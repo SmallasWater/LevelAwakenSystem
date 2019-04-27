@@ -1,6 +1,9 @@
 # LevelAwakenSystem
 ###### 这是一款RPG插件
 
+#### 作者： `若水` 
+###### `QQ: 1798640336`
+
 ##### 前置
 * `EconomyAPI`
 
