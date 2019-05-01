@@ -30,7 +30,7 @@
 > GUI   
 
 > 粒子   
+#### DownLoad
 
-
-[更多内容请点击此处跳转](https://www.minebbs.com/resources/rpg-nukkit.571/ "跳转Minebbs介绍")
+[download](https://www.minebbs.com/resources/rpg-nukkit.571/ "跳转Minebbs介绍")
 
