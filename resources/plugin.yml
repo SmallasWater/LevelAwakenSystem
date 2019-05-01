@@ -1,6 +1,6 @@
 name: LevelAwakenSystem
 main: AwakenSystem.AwakenSystem
-version: "80.4.4.5"
+version: "80.4.4.6"
 api: ["1.0.0"]
 author: "若水"
 load: POSTWORLD
