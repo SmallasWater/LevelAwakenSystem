@@ -115,9 +115,9 @@ public class DamageMath implements baseAPI{
                 damage_f_d += defaultAPI.getPlayerFinalAttributeInt(damager, baseAPI.ItemADDType.DAMAGE_F);
                 if(!defaultAPI.getPlayerAttributeString(entity.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
                     if(defaultAPI.is_R(damager.getName(),defaultAPI.getPlayerAttributeString(entity.getName(), baseAPI.PlayerConfigType.ATTRIBUTE))){
-                        this.cause.put("克制",(int)(damage_f_d * 0.3));
+                        this.cause.put("克制",(int)(damage_f_d * 0.2));
                     }else if(defaultAPI.is_BeRestraint(damager.getName(),defaultAPI.getPlayerAttributeString(entity.getName(), baseAPI.PlayerConfigType.ATTRIBUTE))){
-                        this.cause.put("被克制",(int)(damage_f_d * 0.3));
+                        this.cause.put("被克制",(int)(damage_f_d * 0.2));
                     }
                 }
             }
@@ -134,7 +134,7 @@ public class DamageMath implements baseAPI{
                         damage_b_d = c;
                     }
                     if(damage_b_d >= new Random().nextInt(100) + 1){
-                        this.cause.put("暴击",(int)(damage_w_d * 0.3));
+                        this.cause.put("暴击",(int)(damage_w_d * 0.5));
                     }
                 }
             }
@@ -220,7 +220,7 @@ public class DamageMath implements baseAPI{
                 }
             }
         }
-        if(playerLinkedHashMapLinkedHashMap != null) {
+        if(!playerLinkedHashMapLinkedHashMap.isEmpty()) {
             for (String name : playerLinkedHashMapLinkedHashMap.keySet()) {
                 if (playerLinkedHashMapLinkedHashMap.get(name).containsKey(player)) {
                     LinkedHashMap<ItemADDType, Integer> getting = playerLinkedHashMapLinkedHashMap.get(name).get(player);

@@ -13,16 +13,6 @@ import cn.nukkit.scheduler.Task;
 
  */
 public class GunTask extends Task{
-    /*
-    * public function line($info){
-  $pos=array();
-  $sd=pow($info['X']-$info['X1'],2)+pow($info['Y']-$info['Y1'],2)+pow($info['Z']-$info['Z1'],2);
-  $dis=(int)sqrt($sd);
-  for($t=0;$t<=1;$t+=(1/($dis))){
-   $pos[]=array($info['X']+($info['X1']-$info['X'])*$t,$info['Y']+($info['Y1']-$info['Y'])*$t,$z=$info['Z']+($info['Z1']-$info['Z'])*$t);
-  }
-  return $pos;
- }*/
 
     @Override
     public void onRun(int i) {

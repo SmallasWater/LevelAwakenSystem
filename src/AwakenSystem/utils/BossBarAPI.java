@@ -24,6 +24,7 @@ public class BossBarAPI {
     public void createBossBar(){
         long eid = 0xbb071;
         DummyBossBar bossBar = new BossBar(player,eid).build();
+
         bossBar.setLength(100);
         bossBar.setText("加载中");
         AwakenSystem.getMain().bar.put(player,bossBar);

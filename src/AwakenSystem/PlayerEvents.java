@@ -9,6 +9,7 @@ import AwakenSystem.utils.nbtItems;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
+import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
@@ -17,10 +18,7 @@ import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDeathEvent;
-import cn.nukkit.event.player.PlayerChatEvent;
-import cn.nukkit.event.player.PlayerInteractEvent;
-import cn.nukkit.event.player.PlayerJoinEvent;
-import cn.nukkit.event.player.PlayerMoveEvent;
+import cn.nukkit.event.player.*;
 import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Sound;
@@ -50,9 +48,10 @@ public class PlayerEvents implements Listener {
         Entity entity = event.getEntity();
         entity.attack(event);
     }
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDamage(EntityDamageEvent event){
+
+
         if(event instanceof EntityDamageByEntityEvent){
             if(event.isCancelled()) return;
             Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
@@ -114,6 +113,9 @@ public class PlayerEvents implements Listener {
 
                 return;
             }
+
+
+
             if(entity instanceof Player){
                 float damage = event.getFinalDamage();
                 StringBuilder cause = new StringBuilder("");
@@ -254,13 +256,8 @@ public class PlayerEvents implements Listener {
                             break;
                         case "cmd":
                             String cmd = su[0].replace("@p",player.getName());
-                            if(player.isOp()){
-                                Server.getInstance().dispatchCommand(player,cmd);
-                            }else{
-                                Server.getInstance().addOp(player.getName());
-                                Server.getInstance().dispatchCommand(player,cmd);
-                                Server.getInstance().removeOp(player.getName());
-                            }
+
+                            Server.getInstance().dispatchCommand(new ConsoleCommandSender(),cmd);
                             if(name != null){
                                 player.sendMessage("§l§e◎ - 你获得了 "+name);
                             }
@@ -677,7 +674,7 @@ public class PlayerEvents implements Listener {
     }
 
     @EventHandler
-    public void onCaht(PlayerChatEvent event){
+    public void onChat(PlayerChatEvent event){
         Player player = event.getPlayer();
         String message = event.getMessage();
         if(event.isCancelled()) return;
@@ -761,16 +758,10 @@ public class PlayerEvents implements Listener {
                 if(commands != null && commands.size() > 0){
                     for (String name:commands.keySet()){
                         String command = name.replace("@p",player.getName());
-                        if(!player.isOp()){
-                            Server.getInstance().addOp(player.getName());
-                            Server.getInstance().dispatchCommand(player,command);
-                            Server.getInstance().removeOp(player.getName());
-                        }else{
-                            Server.getInstance().dispatchCommand(player,command);
-                        }
+                        Server.getInstance().dispatchCommand(new ConsoleCommandSender(),command);
                         item.setCount(1);
                         player.getInventory().removeItem(item);
-                        player.sendMessage("§e[系统] §a你获得了 "+commands.get(name));
+                        player.sendMessage(commands.get(name));
                     }
                 }
             }

@@ -341,7 +341,7 @@ public class defaultAPI implements baseAPI{
      * 判断属性是否被克制
      * */
     //
-    static boolean is_BeRestraint(String player, String Restraint){
+      static boolean is_BeRestraint(String player, String Restraint){
       //  return is_Restraint(player,Restraint);
         String R = getPlayerAttributeString(player, PlayerConfigType.ATTRIBUTE);
         return is_Restraint(R,Restraint);
@@ -562,6 +562,7 @@ public class defaultAPI implements baseAPI{
         if(AwakenSystem.getMain().canPVP.containsKey(player)){
             pvp = AwakenSystem.getMain().canPVP.get(player);
         }
+        Item hand = player.getInventory().getItemInHand();
         string = string.replace("{属性}",
                 (defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE).equals("null"))?"无属性":
                         defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE)).
@@ -582,7 +583,9 @@ public class defaultAPI implements baseAPI{
                 replace("{kx}",String.valueOf(defaultAPI.getPlayerFinalAttributeInt(player,ItemADDType.RESISTANCE))).
                 replace("{c}",String.valueOf(defaultAPI.getPlayerFinalAttributeInt(player,ItemADDType.PENETRATION))).
                 replace("{饰品}", add != null ? add : "无").
-                replace("{pvp}",pvp?"§c敌对":"§a和平");
+                replace("{pvp}",pvp?"§c敌对":"§a和平").
+                replace("{id}",hand.getId()+"").
+                replace("{damage}",hand.getDamage()+"");
         return string;
 
     }
@@ -750,7 +753,8 @@ public class defaultAPI implements baseAPI{
     //显示粒子
     public static void showParticle(Player player){
         if(!defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE).equals("null")){
-            HashMap rgbs = (HashMap) AwakenSystem.getMain().getAttributeConfig().get(defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE));
+            HashMap rgbs = (HashMap) AwakenSystem.getMain().getAttributeConfig().
+                    get(defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE));
             if(rgbs.containsKey(AttType.Particle.getName())){
                 HashMap rgb = (HashMap) rgbs.get(AttType.Particle.getName());
                 int r = (int) rgb.get(AttType.R.getName());

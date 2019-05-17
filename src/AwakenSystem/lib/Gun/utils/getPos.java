@@ -1,7 +1,10 @@
 package AwakenSystem.lib.Gun.utils;
 
 import cn.nukkit.Player;
-import cn.nukkit.math.Vector3;
+import cn.nukkit.level.Position;
+
+import java.util.LinkedList;
+
 
 /*
     _                   _    _                _
@@ -20,36 +23,34 @@ public class getPos {
         this.player = player;
     }
 
-    public void getPosByLine(double line){
-        Vector3 pos1 = player.getDirectionVector();
-        player.setButtonText("1");
-        double Up = Math.abs(pos1.getUp());//上下
-        double forward = Math.abs(pos1.getForward());//左
-        double right = Math.abs(pos1.getRight());//右
-        player.sendPopup("up "+ Up);
 
-        if(Up >= 0){
+    public Position getPosByLine(double line){
+        return player.getTargetBlock((int)line);
+    }
 
-        }else{
-
+    public LinkedList<Position> mathLine(Position blockPos){
+        Position playerPos = new Position(player.x,player.y+player.getEyeHeight(),player.z,player.level);
+        LinkedList<Position> positions = new LinkedList<>();
+        double sd = Math.pow(playerPos.x-blockPos.x,2)+Math.pow(playerPos.y-blockPos.y,2)+Math.pow(playerPos.z-blockPos.z,2);
+        int dis=(int)Math.sqrt(sd);
+        for(int t = 0;t <= 1; t +=(1/(dis))){
+            positions.add(new Position((playerPos.x+(blockPos.x - playerPos.x) * t)
+                    ,(playerPos.y + (blockPos.y - playerPos.y) * t),(playerPos.z + (blockPos.z - playerPos.z) * t)));
         }
-        //象限判断
-        double raw = Math.toDegrees(player.yaw / 180 * Math.PI);
-        if(raw > 0 && raw <= 90){
-            // 1
+        return positions;
+    }
 
-        }else if(raw > 90 && raw <= 180){
-            // 2
+    //检测碰撞
 
-        }else if(raw > 180 && raw <= 270){
-            // 3
-
-        }else{
-            // 4
-
-        }
-
+    public boolean canAttack(Position position,Player player){
+        return (position.x > player.x - 0.2 && position.x < player.x + 0.2)
+                && (position.y > player.y && position.y < player.y + player.getEyeHeight())
+                && (position.z > player.z - 0.2 && position.z < player.z + 0.2);
 
     }
+
+
+
+
 
 }

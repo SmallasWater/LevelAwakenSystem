@@ -238,6 +238,29 @@ public interface baseAPI {
     * }
     *
     * */
+
+    enum ArmorType{
+        ID("ID:Damage","264:0"),
+        MESSAGE("介绍","特殊物品"),
+        STAR("品质","*"),
+        LEVEL("限制使用等级",0),
+        ATT("限制属性",null),
+        TYPE("Buff",new LinkedList<String>());
+        protected String name;
+        protected Object defaultADD;
+        ArmorType(String name,Object defaultADD){
+            this.name = name;
+            this.defaultADD = defaultADD;
+        }
+
+        public Object getDefaultADD() {
+            return defaultADD;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
     enum ItemType{
         ID("ID:Damage","264:0"),
         MESSAGE("介绍","特殊物品"),
