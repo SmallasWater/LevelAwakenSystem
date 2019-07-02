@@ -344,7 +344,7 @@ public interface baseAPI {
             put("个人信息","textures/ui/copy");
             put("属性","textures/ui/fire_resistance_effect");
             put("进阶评级","textures/ui/invite_base");
-            put("PVP状态","textures/ui/icon_recipe_equipment");
+//            put("PVP状态","textures/ui/icon_recipe_equipment");
         }
     };
 

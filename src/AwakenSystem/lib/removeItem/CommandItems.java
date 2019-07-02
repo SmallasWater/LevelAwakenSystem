@@ -3,6 +3,7 @@ package AwakenSystem.lib.removeItem;
 import AwakenSystem.AwakenSystem;
 import AwakenSystem.data.baseAPI;
 import AwakenSystem.data.getFiles;
+import AwakenSystem.lib.baseItem;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.enchantment.Enchantment;
@@ -24,20 +25,20 @@ import java.util.LinkedList;
  @author 若水
 
  */
-public class CommandItems {
+public class CommandItems extends baseItem {
     private static String Name = "CommandItems";
     private String name = null;
     private static CommandItems api;
 
     private CommandItems(String name){
-        this.name = name;
+        super(name);
         api = this;
     }
     public static CommandItems getInstance(String name){
         new CommandItems(name);
         return api;
     }
-    private CompoundTag getCompoundTag(){
+    public CompoundTag getCompoundTag(){
         return new CompoundTag()
                 .putString("tag","LevelAwakenSystem"+Name)
                 .putString("name",name);
@@ -112,7 +113,7 @@ public class CommandItems {
         return getItem(1);
     }
 
-    private String[] getLore(){
+    public String[] getLore(){
         if(is_Exit(name)){
             ArrayList<String> lore = new ArrayList<>();
             lore.add("§l"+AwakenSystem.getMain().getCommandItemConfig(name).getString(baseAPI.ItemConfigType.Message.getName()).replace("\n","\n"));

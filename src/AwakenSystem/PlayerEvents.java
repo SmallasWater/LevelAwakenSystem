@@ -45,77 +45,82 @@ public class PlayerEvents implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPvpDamage(PlayerAttackEvent event){
         if(event.isCancelled()) return;
+        Entity damager = (event).getDamager();
+
         Entity entity = event.getEntity();
-        entity.attack(event);
+
+        DamageMath math = new DamageMath();
+        StringBuilder cause = new StringBuilder("");
+        if(damager instanceof Player && entity instanceof Player){
+            int[] damage = math.getDamage_byPVP((Player) damager,(Player) entity,
+                    new float[]{( event).getDamageW(),(event).getDamageF()});
+            HashMap<String,Integer> map = math.getCause();
+
+            if(map != null){
+                if(map.containsKey("暴击")){
+                    damage[0] += map.get("暴击");
+                    cause.append(" §d暴击§r ");
+
+                }
+                if(map.containsKey("克制")){
+                    damage[1] += map.get("克制");
+                    map.remove("克制");
+                    cause.append(" §b克制§r ");
+                }
+                if(map.containsKey("被克制")){
+                    damage[1] -= map.get("被克制");
+                    map.remove("被克制");
+                    cause.append(" §f微弱§r ");
+                }
+            }
+            int delDamageFinal = math.getDelDamage_byPVP((Player) damager,(Player) entity,damage);
+            if(delDamageFinal <= 0){
+                cause.append(" §c(强制伤害)§r ");
+                delDamageFinal = 1;
+            }
+            if(map != null){
+                if(map.containsKey("暴击")){
+                    double deltaY = entity.x - damager.x;
+                    double deltaZ = entity.z - damager.z;
+                    double yaw = Math.atan2(deltaY, deltaZ);
+                    ((Player) entity).knockBack(damager,1,Math.sin(yaw),Math.cos(yaw), 0.5D);
+                    entity.getLevel().addSound(entity.getPosition(),Sound.CAULDRON_EXPLODE);
+                    entity.level.addParticle(new DestroyBlockParticle(new Vector3(entity.x, entity.y, entity.z),
+                            Block.get(152,0)));
+                    map.remove("暴击");
+                }
+            }
+            event.setDamage(delDamageFinal);
+
+            ((Player) damager).sendPopup(cause.toString()+" §f- §b"+event.getDamage()+"\n\n\n\n\n\n\n\n\n");
+            ((Player) entity).sendPopup(cause.toString()+"§f- §c"+event.getDamage()+"\n\n\n\n\n\n\n\n\n");
+        }else if(damager instanceof Player){
+            event.setDamage(event.getDamageF() + event.getDamageW());
+            ((Player) damager).sendPopup(cause.toString()+" §f- §b"+event.getDamage()+"\n\n\n\n\n\n\n\n\n");
+        }
     }
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event){
-
-
         if(event instanceof EntityDamageByEntityEvent){
+            if(event instanceof PlayerAttackEvent)
+                return;
             if(event.isCancelled()) return;
             Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
             Entity entity = event.getEntity();
-            DamageMath math = new DamageMath();
+
             if(damager instanceof Player && entity instanceof Player){
-                StringBuilder cause = new StringBuilder("");
-                    boolean pvp = false;
-                    if(AwakenSystem.getMain().canPVP.containsKey(damager)){
-                        pvp = AwakenSystem.getMain().canPVP.get(damager);
-                    }
-                    if(!pvp){
-                        ((Player) damager).sendMessage("§c和平状态下不能PVP");
-                        event.setCancelled();
-                        return;
-                    }
-                    int[] damage = math.getDamage_byPVP((Player) damager,(Player) entity,event.getFinalDamage());
-                    HashMap<String,Integer> map = math.getCause();
-
-                    if(map != null){
-                        if(map.containsKey("暴击")){
-                            damage[0] += map.get("暴击");
-                            cause.append(" §d暴击§r ");
-
-                        }
-                        if(map.containsKey("克制")){
-                            damage[1] += map.get("克制");
-                            map.remove("克制");
-                            cause.append(" §b克制§r ");
-                        }
-                        if(map.containsKey("被克制")){
-                            damage[1] -= map.get("被克制");
-                            map.remove("被克制");
-                            cause.append(" §f微弱§r ");
-                        }
-                    }
-                    int delDamageFinal = math.getDelDamage_byPVP((Player) damager,(Player) entity,damage);
-                    if(delDamageFinal <= 0){
-                        cause.append(" §c(强制伤害)§r ");
-                        delDamageFinal = 1;
-                    }
-                    if(map != null){
-                        if(map.containsKey("暴击")){
-                            double deltaY = entity.x - damager.x;
-                            double deltaZ = entity.z - damager.z;
-                            double yaw = Math.atan2(deltaY, deltaZ);
-                            ((Player) entity).knockBack(damager,1,Math.sin(yaw),Math.cos(yaw), 0.5D);
-                            entity.getLevel().addSound(entity.getPosition(),Sound.CAULDRON_EXPLODE);
-                            entity.level.addParticle(new DestroyBlockParticle(new Vector3(entity.x, entity.y, entity.z),
-                                    Block.get(152,0)));
-                            map.remove("暴击");
-                        }
-                    }
-                event.setDamage(delDamageFinal);
-                int finalDamage = (int) event.getFinalDamage();
-
-                ((Player) damager).sendPopup(cause.toString()+" §f- §b"+finalDamage+"\n\n\n\n\n\n\n\n\n");
-                ((Player) entity).sendPopup(cause.toString()+"§f- §c"+finalDamage+"\n\n\n\n\n\n\n\n\n");
-
+                boolean pvp = false;
+                if(AwakenSystem.getMain().canPVP.containsKey(damager)){
+                    pvp = AwakenSystem.getMain().canPVP.get(damager);
+                }
+//                if(!pvp){
+//                    ((Player) damager).sendMessage("§c和平状态下不能PVP");
+//                    event.setCancelled();
+//                    return;
+//                }
+                defaultAPI.addPlayerAttack((Player)damager,entity,event.getDamage(),0);
                 return;
             }
-
-
-
             if(entity instanceof Player){
                 float damage = event.getFinalDamage();
                 StringBuilder cause = new StringBuilder("");

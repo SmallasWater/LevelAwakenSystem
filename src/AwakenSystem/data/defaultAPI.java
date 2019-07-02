@@ -16,6 +16,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.particle.DustParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.Config;
+import me.onebone.economyapi.EconomyAPI;
 
 import java.io.File;
 import java.util.*;
@@ -428,19 +429,22 @@ public class defaultAPI implements baseAPI{
 
     /**
      * @param player 玩家
+     * @param entity 被攻击
      * @param damageW 物理攻击
      * @param damageF 法术攻击
+     *
      * 给玩家添加攻击
      * */
     public static void addPlayerAttack(Player player,Entity entity,float damageW,float damageF){
-        PlayerAttackEvent event = new PlayerAttackEvent(player,entity,EntityDamageByEntityEvent.DamageCause.MAGIC,damageW,damageF,0.3F);
-        Server.getInstance().getPluginManager().callEvent(event);
+        addPlayerAttack(player,entity,EntityDamageByEntityEvent.DamageCause.ENTITY_ATTACK,damageW,damageF,0.3F);
     }
     /**
      * @param player 玩家
      * @param damageW 物理攻击
      * @param damageF 法术攻击
      * @param cause 原因
+     * @param knock 击退
+     * @param entity 被攻击
      * 给玩家添加攻击
      * */
     public static void addPlayerAttack(Player player, Entity entity, EntityDamageEvent.DamageCause cause, float damageW, float damageF,float knock){
@@ -555,6 +559,7 @@ public class defaultAPI implements baseAPI{
     public static String getStr_replace(Player player,String string){
         Item item = player.getInventory().getItem(35);
         String add = null;
+        
         if(nbtItems.can_use(player,item)){
             add = nbtItems.getName(item);
         }
@@ -585,6 +590,7 @@ public class defaultAPI implements baseAPI{
                 replace("{饰品}", add != null ? add : "无").
                 replace("{pvp}",pvp?"§c敌对":"§a和平").
                 replace("{id}",hand.getId()+"").
+                replace("{money}", EconomyAPI.getInstance().myMoney(player)+"").
                 replace("{damage}",hand.getDamage()+"");
         return string;
 

@@ -4,6 +4,8 @@ import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.player.PlayerEvent;
 
 /*
     _                   _    _                _
@@ -18,6 +20,7 @@ import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 public class PlayerAttackEvent extends EntityDamageByEntityEvent{
 
     private float damageW,damageF;
+    private float knockBack;
     private static final HandlerList handlers = new HandlerList();
 
     public PlayerAttackEvent(Entity damager, Entity entity, DamageCause cause, float damageW,float damageF,float knock) {
@@ -36,8 +39,8 @@ public class PlayerAttackEvent extends EntityDamageByEntityEvent{
     }
 
     @Override
-    public Player getDamager() {
-        return (Player) super.getDamager();
+    public Entity getDamager() {
+        return super.getDamager();
     }
 
     @Override
@@ -50,15 +53,9 @@ public class PlayerAttackEvent extends EntityDamageByEntityEvent{
         return damageW;
     }
 
-    public void setDamageW(float damageW){
-        this.damageF = damageF;
-    }
 
     public float getDamageF() {
         return damageF;
     }
 
-    public void setDamageF(float damageF) {
-        this.damageF = damageF;
-    }
 }

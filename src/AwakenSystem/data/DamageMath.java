@@ -101,13 +101,13 @@ public class DamageMath implements baseAPI{
      * 根据玩家属性对初始伤害进行加成
      *               @return 处理后的 物理攻击伤害 与 法术攻击伤害
      * */
-    public int[] getDamage_byPVP(Player damager,Player entity,float damage){
+    public int[] getDamage_byPVP(Player damager,Player entity,float[] damage){
 
             //damage物理伤害
-            int damage_w_d = defaultAPI.getPlayerFinalAttributeInt(damager, baseAPI.ItemADDType.DAMAGE_W) + (int)damage;
+            int damage_w_d = defaultAPI.getPlayerFinalAttributeInt(damager, baseAPI.ItemADDType.DAMAGE_W) + (int)damage[0];
 
             //damage法术伤害
-            int damage_f_d = 0;
+            int damage_f_d = (int)damage[1];
             //damage暴击伤害
             // --- 伤害计算 ----//
             if(!defaultAPI.getPlayerAttributeString(damager.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
@@ -180,21 +180,21 @@ public class DamageMath implements baseAPI{
     }
 
 
-   //开放接口 这个是除饰品与buff的额外增加
-    /**
-     * @param type 名称(避免重复)
-     *             @param player 玩家
-     *                           @param addTypeIntegerLinkedHashMap 增加的属性集合
-     *                                                              额外给玩家增加属性
-     * */
-
-    public static void addPlayerAttribute(String type,Player player,LinkedHashMap<ItemADDType,Integer> addTypeIntegerLinkedHashMap){
-        LinkedHashMap<Player,LinkedHashMap<ItemADDType,Integer>> add = new LinkedHashMap<>();
-        add.put(player,addTypeIntegerLinkedHashMap);
-        playerLinkedHashMapLinkedHashMap.put(type,add);
-    }
-
-    private static LinkedHashMap<String,LinkedHashMap<Player,LinkedHashMap<ItemADDType,Integer>>> playerLinkedHashMapLinkedHashMap = new LinkedHashMap<>();
+//   //开放接口 这个是除饰品与buff的额外增加
+//    /**
+//     * @param type 名称(避免重复)
+//     *             @param player 玩家
+//     *                           @param addTypeIntegerLinkedHashMap 增加的属性集合
+//     *                                                              额外给玩家增加属性
+//     * */
+//
+//    public static void addPlayerAttribute(String type,Player player,LinkedHashMap<ItemADDType,Integer> addTypeIntegerLinkedHashMap){
+//        LinkedHashMap<Player,LinkedHashMap<ItemADDType,Integer>> add = new LinkedHashMap<>();
+//        add.put(player,addTypeIntegerLinkedHashMap);
+//        playerLinkedHashMapLinkedHashMap.put(type,add);
+//    }
+//
+//    private static LinkedHashMap<String,LinkedHashMap<Player,LinkedHashMap<ItemADDType,Integer>>> playerLinkedHashMapLinkedHashMap = new LinkedHashMap<>();
 
     //获取所有额外加成
     /**
@@ -220,18 +220,18 @@ public class DamageMath implements baseAPI{
                 }
             }
         }
-        if(!playerLinkedHashMapLinkedHashMap.isEmpty()) {
-            for (String name : playerLinkedHashMapLinkedHashMap.keySet()) {
-                if (playerLinkedHashMapLinkedHashMap.get(name).containsKey(player)) {
-                    LinkedHashMap<ItemADDType, Integer> getting = playerLinkedHashMapLinkedHashMap.get(name).get(player);
-                    if (getting.containsKey(type)) {
-                        addAttribute += getting.get(type);
-                    }
-                }
-                playerLinkedHashMapLinkedHashMap.remove(name);
-            }
-
-        }
+//        if(!playerLinkedHashMapLinkedHashMap.isEmpty()) {
+//            for (String name : playerLinkedHashMapLinkedHashMap.keySet()) {
+//                if (playerLinkedHashMapLinkedHashMap.get(name).containsKey(player)) {
+//                    LinkedHashMap<ItemADDType, Integer> getting = playerLinkedHashMapLinkedHashMap.get(name).get(player);
+//                    if (getting.containsKey(type)) {
+//                        addAttribute += getting.get(type);
+//                    }
+//                }
+//                playerLinkedHashMapLinkedHashMap.remove(name);
+//            }
+//
+//        }
         return addAttribute;
     }
 
@@ -265,18 +265,20 @@ public class DamageMath implements baseAPI{
                 }
             }
         }
-        if(playerLinkedHashMapLinkedHashMap != null){
-            for(String type:playerLinkedHashMapLinkedHashMap.keySet()){
-                for(ItemADDType addType:playerLinkedHashMapLinkedHashMap.get(type).get(player).keySet()){
-                    if(add.containsKey(addType)){
-                        add.put(addType,add.get(addType)+playerLinkedHashMapLinkedHashMap.get(type).get(player).get(addType));
-                    }else{
-                        add.put(addType,playerLinkedHashMapLinkedHashMap.get(type).get(player).get(addType));
-                    }
-                }
-                playerLinkedHashMapLinkedHashMap.remove(type);
-            }
-        }
+
+
+//        if(playerLinkedHashMapLinkedHashMap != null){
+//            for(String type:playerLinkedHashMapLinkedHashMap.keySet()){
+//                for(ItemADDType addType:playerLinkedHashMapLinkedHashMap.get(type).get(player).keySet()){
+//                    if(add.containsKey(addType)){
+//                        add.put(addType,add.get(addType)+playerLinkedHashMapLinkedHashMap.get(type).get(player).get(addType));
+//                    }else{
+//                        add.put(addType,playerLinkedHashMapLinkedHashMap.get(type).get(player).get(addType));
+//                    }
+//                }
+//                playerLinkedHashMapLinkedHashMap.remove(type);
+//            }
+//        }
         return add;
     }
 

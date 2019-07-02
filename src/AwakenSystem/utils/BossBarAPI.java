@@ -23,13 +23,13 @@ public class BossBarAPI {
     }
     public void createBossBar(){
         long eid = 0xbb071;
-        DummyBossBar bossBar = new BossBar(player,eid).build();
-
-        bossBar.setLength(100);
+        DummyBossBar bossBar = (new BossBar(this.player, eid)).build();
+        bossBar.setLength(100.0F);
         bossBar.setText("加载中");
-        AwakenSystem.getMain().bar.put(player,bossBar);
-        player.createBossBar(AwakenSystem.getMain().bar.get(player));
+        AwakenSystem.getMain().bar.put(this.player, bossBar);
+        this.player.createBossBar(AwakenSystem.getMain().bar.get(this.player));
     }
+
 
     public void showBoss(){
         if(AwakenSystem.getMain().bar.get(player) != null){

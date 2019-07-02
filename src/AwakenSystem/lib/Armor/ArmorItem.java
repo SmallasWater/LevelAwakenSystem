@@ -10,8 +10,31 @@ package AwakenSystem.lib.Armor;
  @author 若水
 
  */
+// 终于打算写盔甲了....
 
-public class ArmorItem {
+import AwakenSystem.lib.baseItem;
+import cn.nukkit.item.Item;
+
+public class ArmorItem extends baseItem {
+
+
+    private static String Name = "Armor";
+
+    public ArmorItem(String name) {
+        super(name);
+    }
+
+    @Override
+    public Item getItem(int count) {
+        return null;
+    }
+
+    @Override
+    public String[] getLore() {
+        return new String[0];
+    }
+
+
 
 
 

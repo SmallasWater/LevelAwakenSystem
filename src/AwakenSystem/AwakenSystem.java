@@ -20,16 +20,17 @@ package AwakenSystem;
 //                       `=---='
 //     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //               佛祖保佑         永无BUG
-//     
 import AwakenSystem.data.baseAPI;
 import AwakenSystem.data.getFiles;
 import AwakenSystem.data.uiAPI;
 import AwakenSystem.task.*;
 import AwakenSystem.utils.Commands;
+
 import AwakenSystem.utils.adminCommand;
 import AwakenSystem.utils.createCommand;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+
 import cn.nukkit.entity.Entity;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.AsyncTask;
@@ -64,6 +65,7 @@ public class AwakenSystem extends PluginBase{
 
 
     public void onLoad(){
+
         Server.getInstance().getLogger().info("[LevelAwakenSystem] 启动 等级觉醒插件 ");
         for(String i: getFiles.Default_First_Name){
             File file = new File(this.getDataFolder()+"/Players/"+i);
@@ -92,7 +94,6 @@ public class AwakenSystem extends PluginBase{
         Main = this;
         new getFiles();
         new uiAPI();
-
         this.getLogger().info("开始加载等级觉醒插件 by--若水");
         this.getServer().getPluginManager().registerEvents(new PlayerEvents(),this);
         File config = new File(this.getDataFolder()+"/config.yml");
