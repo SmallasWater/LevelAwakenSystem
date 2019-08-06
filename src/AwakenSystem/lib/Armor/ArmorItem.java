@@ -14,14 +14,17 @@ package AwakenSystem.lib.Armor;
 
 import AwakenSystem.lib.baseItem;
 import cn.nukkit.item.Item;
+import cn.nukkit.nbt.tag.CompoundTag;
 
 public class ArmorItem extends baseItem {
 
 
     private static String Name = "Armor";
 
+    private Item item;
+
     public ArmorItem(String name) {
-        super(name);
+        this.name = name;
     }
 
     @Override
@@ -33,6 +36,12 @@ public class ArmorItem extends baseItem {
     public String[] getLore() {
         return new String[0];
     }
+
+    public CompoundTag getCompoundTag(){
+        return super.getCompoundTag();
+
+    }
+
 
 
 

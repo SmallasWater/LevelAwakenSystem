@@ -101,24 +101,17 @@ public class PlayerEvents implements Listener {
     }
     @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event){
+        if(event instanceof PlayerAttackEvent){
+//                event.setDamage(((PlayerAttackEvent) event).getDamageF()+((PlayerAttackEvent) event).getDamageF());
+            return;
+        }
         if(event instanceof EntityDamageByEntityEvent){
-            if(event instanceof PlayerAttackEvent)
-                return;
+
             if(event.isCancelled()) return;
             Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
             Entity entity = event.getEntity();
-
             if(damager instanceof Player && entity instanceof Player){
-                boolean pvp = false;
-                if(AwakenSystem.getMain().canPVP.containsKey(damager)){
-                    pvp = AwakenSystem.getMain().canPVP.get(damager);
-                }
-//                if(!pvp){
-//                    ((Player) damager).sendMessage("§c和平状态下不能PVP");
-//                    event.setCancelled();
-//                    return;
-//                }
-                defaultAPI.addPlayerAttack((Player)damager,entity,event.getDamage(),0);
+                event.setDamage(defaultAPI.addPlayerAttack((Player)damager,entity,event.getDamage(),0).getDamage());
                 return;
             }
             if(entity instanceof Player){
@@ -433,31 +426,31 @@ public class PlayerEvents implements Listener {
         String data;
         ModalFormResponsePacket ui;
         Player player = event.getPlayer();
-        if(!(event.getPacket() instanceof ModalFormResponsePacket)) return;
+        if((event.getPacket() instanceof ModalFormResponsePacket)){
         ui = (ModalFormResponsePacket)event.getPacket();
         data = ui.data.trim();
         int fromId = ui.formId;
-        switch (fromId){
+        switch (fromId) {
             case baseAPI.modal:
-                if(AwakenSystem.getMain().modaltype.containsKey(player)){
-                    switch (AwakenSystem.getMain().modaltype.get(player)){
+                if (AwakenSystem.getMain().modaltype.containsKey(player)) {
+                    switch (AwakenSystem.getMain().modaltype.get(player)) {
                         case AWAKEN:
-                            if(!data.equals("null")){
-                                if(data.equals("true")){
+                            if (!data.equals("null")) {
+                                if (data.equals("true")) {
                                     //同意觉醒 然后判断
-                                    if (EconomyAPI.getInstance().myMoney(player) < DamageMath.getReduceMoney(player)){
+                                    if (EconomyAPI.getInstance().myMoney(player) < DamageMath.getReduceMoney(player)) {
                                         player.sendMessage("§c抱歉~~您的金钱不足");
                                         return;
                                     }
-                                    if(!DamageMath.can_Awaken(player,AwakenSystem.getMain().Awaken.get(player))){
+                                    if (!DamageMath.can_Awaken(player, AwakenSystem.getMain().Awaken.get(player))) {
                                         player.sendMessage("§c抱歉~~您的等级不足 无法觉醒");
                                         return;
                                     }
-                                    if(AwakenSystem.getMain().Awaken.containsKey(player)){
-                                        defaultAPI.startNewAwaken(player,AwakenSystem.getMain().Awaken.get(player));
-                                    }else{
+                                    if (AwakenSystem.getMain().Awaken.containsKey(player)) {
+                                        defaultAPI.startNewAwaken(player, AwakenSystem.getMain().Awaken.get(player));
+                                    } else {
                                         player.sendMessage("§c抱歉出现未知原因 ~~ 觉醒失败啦");
-                                        defaultAPI.addPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.COUNT,1);
+                                        defaultAPI.addPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.COUNT, 1);
                                     }
 //
                                 }
@@ -466,9 +459,9 @@ public class PlayerEvents implements Listener {
 
                             break;
                         case RESET:
-                            if(!data.equals("null")){
-                                if(data.equals("true")){
-                                    if(defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
+                            if (!data.equals("null")) {
+                                if (data.equals("true")) {
+                                    if (defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")) {
                                         player.sendMessage("§c抱歉，你没有属性 无法重置");
                                         return;
                                     }
@@ -477,17 +470,17 @@ public class PlayerEvents implements Listener {
                             }
                             break;
                         case UpData:
-                            if(!data.equals("null")){
+                            if (!data.equals("null")) {
                                 String att = defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE);
-                                if(data.equals("true")){
-                                    if(att.equals("null")){
+                                if (data.equals("true")) {
+                                    if (att.equals("null")) {
                                         player.sendMessage("§c抱歉，你没有属性 无法进阶");
                                         return;
                                     }
                                     String string = defaultAPI.getUpDataAwaken(att);
-                                    if(string != null && !string.equals("null")){
-                                        defaultAPI.startUpAwaken(player,att,string);
-                                    }else{
+                                    if (string != null && !string.equals("null")) {
+                                        defaultAPI.startUpAwaken(player, att, string);
+                                    } else {
                                         player.sendMessage("§d当前属性无法进阶");
                                     }
                                 }
@@ -497,143 +490,144 @@ public class PlayerEvents implements Listener {
                     AwakenSystem.getMain().modaltype.remove(player);
                 }
                 break;
-                case baseAPI.chose:
-                    if(!data.equals("null")){
-                        String att = defaultAPI.getFinalAwaken(player).get(Integer.parseInt(data));
-                        if(AwakenSystem.getMain().modaltype.containsKey(player)){
-                            AwakenSystem.getMain().modaltype.remove(player);
-                        }
-                        if(!defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
-                            player.sendMessage("§c你已经拥有属性了!!!");
-                            return;
-                        }
-                        if(!DamageMath.can_Awaken(player,att)){
-                            player.sendMessage("§c你的等级不足 无法觉醒!!!");
-                            return;
-                        }
-                        //判断是否为进阶属性
-                        //
-                        AwakenSystem.getMain().Awaken.put(player,att);
+            case baseAPI.chose:
+                if (!data.equals("null")) {
+                    String att = defaultAPI.getFinalAwaken(player).get(Integer.parseInt(data));
+                    if (AwakenSystem.getMain().modaltype.containsKey(player)) {
+                        AwakenSystem.getMain().modaltype.remove(player);
+                    }
+                    if (!defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")) {
+                        player.sendMessage("§c你已经拥有属性了!!!");
+                        return;
+                    }
+                    if (!DamageMath.can_Awaken(player, att)) {
+                        player.sendMessage("§c你的等级不足 无法觉醒!!!");
+                        return;
+                    }
+                    //判断是否为进阶属性
+                    //
+                    AwakenSystem.getMain().Awaken.put(player, att);
 
-                        AwakenSystem.getMain().modaltype.put(player, baseAPI.ModalType.AWAKEN);
-                        StringBuilder arr = new StringBuilder("");
-                        LinkedList<Item> remove = defaultAPI.getUseItem_Awaken(att);
-                        if(remove != null){
-                            arr.append("需要物品>>\n");
-                            for (Item item:remove){
-                                arr.append(item.getCustomName()).append(" * ").append(item.getCount()).append("\n");
+                    AwakenSystem.getMain().modaltype.put(player, baseAPI.ModalType.AWAKEN);
+                    StringBuilder arr = new StringBuilder("");
+                    LinkedList<Item> remove = defaultAPI.getUseItem_Awaken(att);
+                    if (remove != null) {
+                        arr.append("需要物品>>\n");
+                        for (Item item : remove) {
+                            arr.append(item.getCustomName()).append(" * ").append(item.getCount()).append("\n");
+                        }
+                    }
+                    String texts = "§c你确定要选择觉醒" + att + "属性吗? \n§b当前成功率: §a" + DamageMath.getAwaken(player) + " %" +
+                            "§d需要花费: " + DamageMath.getReduceMoney(player) + "\n" + arr.toString();
+                    uiAPI.getApi().sendModal(player, texts, "当然", "我再想想");
+                }
+                break;
+            case baseAPI.chose_Att:
+                if (!data.equals("null")) {
+                    switch (Integer.parseInt(data)) {
+                        case 0:
+                            String att = defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE);
+                            if (att.equals("null")) {
+                                player.sendMessage("§c你没有属性 无法重置");
+                                return;
                             }
-                        }
-                        String texts = "§c你确定要选择觉醒"+att+"属性吗? \n§b当前成功率: §a"+DamageMath.getAwaken(player)+" %"+
-                                "§d需要花费: "+DamageMath.getReduceMoney(player)+"\n"+arr.toString();
-                        uiAPI.getApi().sendModal(player,texts,"当然","我再想想");
-                    }
-                    break;
-                case baseAPI.chose_Att:
-                    if(!data.equals("null")) {
-                        switch (Integer.parseInt(data)) {
-                            case 0:
-                                String att = defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE);
-                                if (att.equals("null")) {
-                                    player.sendMessage("§c你没有属性 无法重置");
-                                    return;
+                            AwakenSystem.getMain().modaltype.put(player, baseAPI.ModalType.RESET);
+                            StringBuilder arr = new StringBuilder("");
+                            LinkedList<Item> remove = defaultAPI.getRemoveItem_Awaken(att);
+                            if (remove != null) {
+                                arr.append("需要物品>>\n");
+                                for (Item item : remove) {
+                                    arr.append(item.getCustomName()).append(" * ").append(item.getCount()).append("\n");
                                 }
-                                AwakenSystem.getMain().modaltype.put(player, baseAPI.ModalType.RESET);
-                                StringBuilder arr = new StringBuilder("");
-                                LinkedList<Item> remove = defaultAPI.getRemoveItem_Awaken(att);
-                                if (remove != null) {
-                                    arr.append("需要物品>>\n");
-                                    for (Item item : remove) {
-                                        arr.append(item.getCustomName()).append(" * ").append(item.getCount()).append("\n");
-                                    }
-                                }
-                                String texts = "§c你确定要选择重置"+att+"属性吗\n当前属性: "+att+"\n"+arr.toString();
-                                uiAPI.getApi().sendModal(player,texts,"重置","取消");
-                                break;
-                            case 1:
-                                att = defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE);
-                                if (att.equals("null")) {
-                                    player.sendMessage("§c你没有属性进阶失败");
-                                    return;
-                                }
-                                AwakenSystem.getMain().modaltype.put(player, baseAPI.ModalType.UpData);
-                                String up = defaultAPI.getUpDataAwaken(att);
-                                if(up == null){
-                                    player.sendMessage("§d当前属性无法进阶");
-                                    return;
-                                }
-                                if(up.equals("null")) {
-                                    player.sendMessage("§d当前属性无法进阶");
-                                    return;
-                                }
+                            }
+                            String texts = "§c你确定要选择重置" + att + "属性吗\n当前属性: " + att + "\n" + arr.toString();
+                            uiAPI.getApi().sendModal(player, texts, "重置", "取消");
+                            break;
+                        case 1:
+                            att = defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE);
+                            if (att.equals("null")) {
+                                player.sendMessage("§c你没有属性进阶失败");
+                                return;
+                            }
+                            AwakenSystem.getMain().modaltype.put(player, baseAPI.ModalType.UpData);
+                            String up = defaultAPI.getUpDataAwaken(att);
+                            if (up == null) {
+                                player.sendMessage("§d当前属性无法进阶");
+                                return;
+                            }
+                            if (up.equals("null")) {
+                                player.sendMessage("§d当前属性无法进阶");
+                                return;
+                            }
 
-                                if(!DamageMath.studyAwaken(player)){
-                                    player.sendMessage("§c抱歉 你等级不足"+defaultAPI.getStudyLevel(up)+"进阶失败");
-                                    return;
+                            if (!DamageMath.studyAwaken(player)) {
+                                player.sendMessage("§c抱歉 你等级不足" + defaultAPI.getStudyLevel(up) + "进阶失败");
+                                return;
+                            }
+                            arr = new StringBuilder("");
+                            remove = defaultAPI.getUseItem_Awaken(up);
+                            if (remove != null) {
+                                arr.append("需要物品>>\n");
+                                for (Item item : remove) {
+                                    arr.append(item.getCustomName()).append(" * ").append(item.getCount()).append("\n");
                                 }
-                                arr = new StringBuilder("");
-                                remove = defaultAPI.getUseItem_Awaken(up);
-                                if (remove != null) {
-                                    arr.append("需要物品>>\n");
-                                    for (Item item : remove) {
-                                        arr.append(item.getCustomName()).append(" * ").append(item.getCount()).append("\n");
-                                    }
-                                }
-                                texts = "§c你确定要选择进阶"+att+"属性吗\n可进阶: "+up+"\n"+arr.toString();
-                                uiAPI.getApi().sendModal(player,texts,"进阶","取消");
-                                break;
-                            case 2:
-                                uiAPI.getApi().sendChose(player);
-                                break;
+                            }
+                            texts = "§c你确定要选择进阶" + att + "属性吗\n可进阶: " + up + "\n" + arr.toString();
+                            uiAPI.getApi().sendModal(player, texts, "进阶", "取消");
+                            break;
+                        case 2:
+                            uiAPI.getApi().sendChose(player);
+                            break;
 
-                        }
                     }
-                    break;
-                case baseAPI.from_setting:
-                    if(!data.equals("null")){
-                        switch (Integer.parseInt(data)){
-                            case 0:
-                                StringBuilder text = new StringBuilder("");
-                                text.append("§6等级 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL)).append("\n");
-                                text.append("§6评级 : ").append(defaultAPI.getChatBySetting(player.getName())).append("\n");
-                                text.append("§6属性 : ").append(defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")
-                                        ?"无":defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE)).append("\n");
-                                text.append("§6觉醒次数 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.COUNT)).append("\n");
-                                Item item = player.getInventory().getItem(35);
-                                String add = "无";
-                                if(nbtItems.can_use(player,item)){
-                                    add = nbtItems.getName(item);
-                                }
-                                text.append("§d饰品 : ").append(add).append("\n");
-                                text.append("§6经验值 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP)).append(" / ").append(DamageMath.getUpDataEXP(player)).append("\n");
-                                for (baseAPI.ItemADDType type: baseAPI.ItemADDType.values()){
-                                    if(type.getName().equals(baseAPI.ItemADDType.EXP.getName())) continue;
-                                    text.append(type.getName()).append(" : §e").append(defaultAPI.getPlayerFinalAttributeInt(player,type)).append("\n");
-                                }
-                                uiAPI.getApi().sendMenuMessage(player,text.toString());
-                                break;
-                            case 1:
-                                uiAPI.getApi().sendChoseAtt(player);
-                                break;
-                            case 2:
-                                PlayerUpScoreEvent event1 = new PlayerUpScoreEvent(player,
-                                        defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.TALENT),1);
-                                Server.getInstance().getPluginManager().callEvent(event1);
-                                break;
-                            case 3:
-                                boolean pvp;
-                                if(!AwakenSystem.getMain().canPVP.containsKey(player)){
-                                    AwakenSystem.getMain().canPVP.put(player,true);
-                                }else{
-                                    AwakenSystem.getMain().canPVP.put(player,!AwakenSystem.getMain().canPVP.get(player));
-                                }
-                                pvp = AwakenSystem.getMain().canPVP.get(player);
+                }
+                break;
+            case baseAPI.from_setting:
+                if (!data.equals("null")) {
+                    switch (Integer.parseInt(data)) {
+                        case 0:
+                            StringBuilder text = new StringBuilder("");
+                            text.append("§6等级 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL)).append("\n");
+                            text.append("§6评级 : ").append(defaultAPI.getChatBySetting(player.getName())).append("\n");
+                            text.append("§6属性 : ").append(defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")
+                                    ? "无" : defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE)).append("\n");
+                            text.append("§6觉醒次数 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.COUNT)).append("\n");
+                            Item item = player.getInventory().getItem(35);
+                            String add = "无";
+                            if (nbtItems.can_use(player, item)) {
+                                add = nbtItems.getName(item);
+                            }
+                            text.append("§d饰品 : ").append(add).append("\n");
+                            text.append("§6经验值 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP)).append(" / ").append(DamageMath.getUpDataEXP(player)).append("\n");
+                            for (baseAPI.ItemADDType type : baseAPI.ItemADDType.values()) {
+                                if (type.getName().equals(baseAPI.ItemADDType.EXP.getName())) continue;
+                                text.append(type.getName()).append(" : §e").append(defaultAPI.getPlayerFinalAttributeInt(player, type)).append("\n");
+                            }
+                            uiAPI.getApi().sendMenuMessage(player, text.toString());
+                            break;
+                        case 1:
+                            uiAPI.getApi().sendChoseAtt(player);
+                            break;
+                        case 2:
+                            PlayerUpScoreEvent event1 = new PlayerUpScoreEvent(player,
+                                    defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.TALENT), 1);
+                            Server.getInstance().getPluginManager().callEvent(event1);
+                            break;
+                        case 3:
+                            boolean pvp;
+                            if (!AwakenSystem.getMain().canPVP.containsKey(player)) {
+                                AwakenSystem.getMain().canPVP.put(player, true);
+                            } else {
+                                AwakenSystem.getMain().canPVP.put(player, !AwakenSystem.getMain().canPVP.get(player));
+                            }
+                            pvp = AwakenSystem.getMain().canPVP.get(player);
 
-                                player.sendMessage("§d[系统]§b§l您的PVP状态更改为 ---- "+(pvp?"§c敌对":"§a和平"));
-                                break;
-                        }
+                            player.sendMessage("§d[系统]§b§l您的PVP状态更改为 ---- " + (pvp ? "§c敌对" : "§a和平"));
+                            break;
                     }
-                    break;
+                }
+                break;
+            }
         }
     }
     private boolean is_UpScore(Player player){
@@ -689,6 +683,9 @@ public class PlayerEvents implements Listener {
             event.setCancelled();
             Server.getInstance().broadcastMessage(string+message);
         }
+
+
+
 
     }
 
@@ -808,13 +805,13 @@ public class PlayerEvents implements Listener {
 
 
     @EventHandler
-
     public void moveEvent(PlayerMoveEvent event){
         Player player = event.getPlayer();
         if(!defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
             defaultAPI.showParticle(player);
         }
     }
+
 
 
 }

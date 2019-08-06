@@ -31,7 +31,7 @@ public class CommandItems extends baseItem {
     private static CommandItems api;
 
     private CommandItems(String name){
-        super(name);
+        this.name = name;
         api = this;
     }
     public static CommandItems getInstance(String name){

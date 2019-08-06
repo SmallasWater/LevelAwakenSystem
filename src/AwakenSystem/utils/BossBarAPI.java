@@ -27,13 +27,13 @@ public class BossBarAPI {
         bossBar.setLength(100.0F);
         bossBar.setText("加载中");
         AwakenSystem.getMain().bar.put(this.player, bossBar);
-        this.player.createBossBar(AwakenSystem.getMain().bar.get(this.player));
+        player.createBossBar(AwakenSystem.getMain().bar.get(this.player));
     }
 
 
     public void showBoss(){
         if(AwakenSystem.getMain().bar.get(player) != null){
-            float percentage =(player.getHealth() / player.getMaxHealth()) * 100;
+            float percentage = Math.round((float) player.getHealth() / player.getMaxHealth() * 100);
             String text = AwakenSystem.getMain().getConfig().getString(baseAPI.ConfigType.showBoss.getName());
             DummyBossBar bossBar = AwakenSystem.getMain().bar.get(player);
             bossBar.setColor(0,255,0);

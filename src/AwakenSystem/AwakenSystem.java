@@ -57,6 +57,7 @@ public class AwakenSystem extends PluginBase{
     private static AwakenSystem Main;
     public HashMap<Player,Boolean> canPVP = new HashMap<>();
     public static boolean loadMoney = false;
+    public HashMap<Player,Long> bossbar = new HashMap<>();
     public HashMap<Player,DummyBossBar> bar = new HashMap<>();
     HashMap<Player,Integer> defaultMaxHealth = new HashMap<>();
     LinkedHashMap<Player,String> Awaken = new LinkedHashMap<>();//用作临时存储觉醒属性
@@ -101,6 +102,7 @@ public class AwakenSystem extends PluginBase{
             this.saveDefaultConfig();
             this.reloadConfig();
         }
+
         File att = new File(this.getDataFolder()+"/attribute.yml");
         if(!att.exists()){
             this.saveResource("attribute.yml");
@@ -108,6 +110,7 @@ public class AwakenSystem extends PluginBase{
 
         this.getServer().getCommandMap().register("",new Commands("level"));
         this.getServer().getCommandMap().register("",new adminCommand("lac"));
+
 
         this.getServer().getCommandMap().register("",new createCommand("items"));
         //3秒后异步启动 看你怎么禁止

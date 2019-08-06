@@ -29,6 +29,7 @@ public class PlayerLevelUpEvent extends PlayerEvent implements Cancellable{
         this.player = player;
         this.oldLevel = oldLevel;
         this.addLevel = addLevel;
+
     }
     public PlayerLevelUpEvent(Player player,int oldLevel,int addLevel,boolean showUi){
         this.player = player;

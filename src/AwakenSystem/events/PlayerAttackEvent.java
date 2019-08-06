@@ -38,6 +38,14 @@ public class PlayerAttackEvent extends EntityDamageByEntityEvent{
         return handlers;
     }
 
+    public void setDamageF(float damageF) {
+        this.damageF = damageF;
+    }
+
+    public void setDamageW(float damageW) {
+        this.damageW = damageW;
+    }
+
     @Override
     public Entity getDamager() {
         return super.getDamager();

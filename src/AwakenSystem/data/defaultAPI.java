@@ -435,8 +435,8 @@ public class defaultAPI implements baseAPI{
      *
      * 给玩家添加攻击
      * */
-    public static void addPlayerAttack(Player player,Entity entity,float damageW,float damageF){
-        addPlayerAttack(player,entity,EntityDamageByEntityEvent.DamageCause.ENTITY_ATTACK,damageW,damageF,0.3F);
+    public static PlayerAttackEvent addPlayerAttack(Player player,Entity entity,float damageW,float damageF){
+        return addPlayerAttack(player,entity,EntityDamageByEntityEvent.DamageCause.ENTITY_ATTACK,damageW,damageF,0.3F);
     }
     /**
      * @param player 玩家
@@ -447,9 +447,10 @@ public class defaultAPI implements baseAPI{
      * @param entity 被攻击
      * 给玩家添加攻击
      * */
-    public static void addPlayerAttack(Player player, Entity entity, EntityDamageEvent.DamageCause cause, float damageW, float damageF,float knock){
+    public static PlayerAttackEvent addPlayerAttack(Player player, Entity entity, EntityDamageEvent.DamageCause cause, float damageW, float damageF,float knock){
         PlayerAttackEvent event = new PlayerAttackEvent(player,entity,cause,damageW,damageF,knock);
         Server.getInstance().getPluginManager().callEvent(event);
+        return event;
     }
 
     /**

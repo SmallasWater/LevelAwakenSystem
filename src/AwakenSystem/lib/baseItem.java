@@ -6,13 +6,10 @@ import cn.nukkit.nbt.tag.CompoundTag;
 
 public abstract class baseItem {
 
-    private static String Name = null;
+    private String Name = null;
 
     protected String name = null;
 
-    public baseItem(String name){
-        this.name = name;
-    }
 
     public CompoundTag getCompoundTag(){
         return new CompoundTag()

@@ -31,6 +31,9 @@ public class PlayerAddExpEvent extends PlayerEvent implements Cancellable{
         return handlers;
     }
 
+    public void setExp(double exp) {
+        this.exp = exp;
+    }
 
     public double getExp() {
         return exp;
