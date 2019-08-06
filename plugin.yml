@@ -1,6 +1,0 @@
-name: LevelAwakenSystem
-main: AwakenSystem.AwakenSystem
-version: "80.4.8"
-api: ["1.0.0","1.0.8"]
-author: "若水"
-load: POSTWORLD
