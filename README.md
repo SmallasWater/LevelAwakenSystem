@@ -30,6 +30,8 @@
 > GUI   
 
 > 粒子   
-
+#### 指令
+/lac help
+/level
 
 
