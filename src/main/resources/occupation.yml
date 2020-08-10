@@ -1,0 +1,49 @@
+# 这里为职业系统
+
+小剑士:
+  职业最低等级: 10
+  需要物品: []
+  成功率: 100
+  # 设置这个职业临时增加的技能点
+  转职: ["剑师"]
+  专属buff: []
+
+  技能点增加:
+    HEALTH: 2
+    DAMAGE: 1
+    DEFENSE: 0
+    MISS: 1
+    MUST_DAMAGE: 0
+    RESISTANCE: 1
+    PENETRATION: 1
+
+剑师:
+  职业最低等级: 50
+  需要物品: []
+  成功率: 100
+  # 设置这个职业临时增加的技能点
+  转职: ["大剑师"]
+  专属buff: []
+  技能点增加:
+    HEALTH: 2
+    DAMAGE: 1
+    DEFENSE: 0
+    MISS: 1
+    MUST_DAMAGE: 0
+    RESISTANCE: 1
+    PENETRATION: 1
+剑圣:
+  职业最低等级: 100
+  需要物品: []
+  成功率: 100
+  # 设置这个职业临时增加的技能点
+  转职: []
+  专属buff: []
+  技能点增加:
+    HEALTH: 2
+    DAMAGE: 1
+    DEFENSE: 0
+    MISS: 1
+    MUST_DAMAGE: 0
+    RESISTANCE: 1
+    PENETRATION: 1
