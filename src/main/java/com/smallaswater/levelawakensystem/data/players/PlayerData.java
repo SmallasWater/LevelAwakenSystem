@@ -1,9 +1,12 @@
 package com.smallaswater.levelawakensystem.data.players;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.utils.Config;
 import com.smallaswater.levelawakensystem.LevelAwakenSystem;
 import com.smallaswater.levelawakensystem.data.BaseHuman;
+import com.smallaswater.levelawakensystem.events.defaults.PlayerAddExpEvent;
+import com.smallaswater.levelawakensystem.events.defaults.PlayerAddLevelEvent;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,9 +48,22 @@ public class PlayerData extends BaseHuman {
         this.name = player.getName();
     }
 
+    @Override
+    public void addExp(float exp) {
+        Player player = Server.getInstance().getPlayer(getName());
+        if(player != null) {
+            PlayerAddExpEvent event = new PlayerAddExpEvent(player,exp);
+            Server.getInstance().getPluginManager().callEvent(event);
+            if(!event.isCancelled()){
+                exp = event.getExp();
+            }else{
+                return;
+            }
+        }
+        super.addExp(exp);
+    }
 
-
-    public PlayerData(String playerName, int level, float exp,float maxExp,int levelClass, String occupation, LinkedHashMap<PlayerAttribute, Number> playerAttributes) {
+    public PlayerData(String playerName, int level, float exp, float maxExp, int levelClass, String occupation, LinkedHashMap<PlayerAttribute, Number> playerAttributes) {
         super(null,level,exp,maxExp, levelClass, occupation, playerAttributes);
         this.name = playerName;
     }
@@ -57,7 +73,20 @@ public class PlayerData extends BaseHuman {
     }
 
 
-
+    @Override
+    public void addLevel(int level) {
+        Player player = Server.getInstance().getPlayer(getName());
+        if(player != null) {
+            PlayerAddLevelEvent event = new PlayerAddLevelEvent(player,level);
+            Server.getInstance().getPluginManager().callEvent(event);
+            if(!event.isCancelled()){
+                level = event.getLevel();
+            }else{
+                return;
+            }
+        }
+        super.addLevel(level);
+    }
 
     public void save(){
         Config config = new Config(LevelAwakenSystem.INSTANCE.getDataFolder()+"/players/"+name+".yml");

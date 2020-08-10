@@ -2,6 +2,7 @@ package com.smallaswater.levelawakensystem.data;
 
 import cn.nukkit.entity.Entity;
 import com.smallaswater.levelawakensystem.data.effects.BaseBuffer;
+import com.smallaswater.levelawakensystem.events.defaults.PlayerAddLevelEvent;
 import com.smallaswater.levelawakensystem.task.TaskHandle;
 
 import java.util.LinkedHashMap;
@@ -161,8 +162,26 @@ public abstract class BaseHuman{
         handles.add(new TaskHandle(buffer));
     }
 
+    public void addLevel(int level){
+        this.level += level;
+
+    }
+
+    public void addExp(float exp){
+        if(this.exp + exp >= this.maxExp){
+            this.exp = 0;
+            addExp((this.exp + exp) - this.maxExp);
+        }else{
+            this.exp += exp;
+        }
+    }
+
+
     public void setExp(float exp) {
         this.exp = exp;
+        if(this.exp >= this.maxExp){
+            this.addExp(this.exp - this.maxExp);
+        }
     }
 
     public void setMaxExp(float maxExp) {
