@@ -5,30 +5,42 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.smallaswater.levelawakensystem</groupId>
-    <artifactId>levelawakensystem</artifactId>
+    <artifactId>LevelAwakenSystem</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>nukkitx-repo</id>
+            <name>nukkitx-snapshot</name>
+            <url>https://repo.nukkitx.com/maven-snapshots</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath> F:/Maven/.m2/repository/cn/nukkit/nukkit/1.0-SNAPSHOT/nukkit-1.0-20200308.181528-752.jar</systemPath>
         </dependency>
-
         <dependency>
             <groupId>tips</groupId>
             <artifactId>tip</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.7.8</version>
             <scope>system</scope>
-            <systemPath> F:/Nukkit开服/plugins/Tips_v1.7.8.jar</systemPath>
+            <systemPath>${project.basedir}/lib/Tips_v1.7.8.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.samllaswater.healthapi</groupId>
             <artifactId>healthapi</artifactId>
-            <version>1.1.7</version>
+            <version>1.1.8</version>
             <scope>system</scope>
-            <systemPath> F:/Nukkit驱动_Maven/healthapi/target/healthapi_v1.1.7.jar</systemPath>
+            <systemPath>${project.basedir}/lib/healthapi_v1.1.8.jar</systemPath>
         </dependency>
 
     </dependencies>
@@ -42,11 +54,10 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-
 
 </project>
