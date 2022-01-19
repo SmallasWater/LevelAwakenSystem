@@ -19,9 +19,13 @@ import AwakenSystem.utils.nbtItems;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemPaper;
+import cn.nukkit.network.protocol.AddEntityPacket;
+import cn.nukkit.network.protocol.RemoveEntityPacket;
 import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.Config;
 
+import javax.tools.Tool;
 import java.io.File;
 import java.util.LinkedHashMap;
 
@@ -45,8 +49,11 @@ public class TipTask extends Task{
                             break;
                     }
                 }
-                if(AwakenSystem.getMain().getConfig().getBoolean(baseAPI.ConfigType.can_show_Tag.getName()))
+                if(AwakenSystem.getMain().getConfig().getBoolean(baseAPI.ConfigType.can_show_Tag.getName())) {
                     player.setNameTag(defaultAPI.getStr_replace(player,AwakenSystem.getMain().getConfig().getString(baseAPI.ConfigType.TAG_MESSAGE.getName())));
+                }
+
+
             }else{
                 LinkedHashMap<String,Object> conf = getFiles.initPlayer();
                 Config config = AwakenSystem.getMain().getPlayerConfig(player);

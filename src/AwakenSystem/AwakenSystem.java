@@ -31,11 +31,12 @@ import AwakenSystem.utils.createCommand;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 
-import cn.nukkit.entity.Entity;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.DummyBossBar;
+import updata.AutoData;
+import updata.utils.UpData;
 
 import java.io.File;
 import java.util.HashMap;
@@ -56,17 +57,28 @@ public class AwakenSystem extends PluginBase{
 
     private static AwakenSystem Main;
     public HashMap<Player,Boolean> canPVP = new HashMap<>();
+
     public static boolean loadMoney = false;
+
     public HashMap<Player,Long> bossbar = new HashMap<>();
+
     public HashMap<Player,DummyBossBar> bar = new HashMap<>();
+
     HashMap<Player,Integer> defaultMaxHealth = new HashMap<>();
+
     LinkedHashMap<Player,String> Awaken = new LinkedHashMap<>();//用作临时存储觉醒属性
+
+    LinkedHashMap<String,Config> playerConfig = new LinkedHashMap<>();
+
     LinkedHashMap<Player,baseAPI.ModalType> modaltype = new LinkedHashMap<>();
+
+    public String levelUpMath = "({level} * ({level} + 200) ) + {pf} * 100";
+
     public LinkedHashMap<Player,LinkedHashMap<String,LinkedHashMap<baseAPI.ItemADDType,int[]>>> runAdd = new LinkedHashMap<>();
 
 
+    @Override
     public void onLoad(){
-
         Server.getInstance().getLogger().info("[LevelAwakenSystem] 启动 等级觉醒插件 ");
         for(String i: getFiles.Default_First_Name){
             File file = new File(this.getDataFolder()+"/Players/"+i);
@@ -93,6 +105,12 @@ public class AwakenSystem extends PluginBase{
     @Override
     public void onEnable() {
         Main = this;
+        if(Server.getInstance().getPluginManager().getPlugin("AutoUpData") != null){
+            this.getLogger().info("检查更新中");
+            if(AutoData.defaultUpData(this,getFile(),"SmallasWater","LevelAwakenSystem")){
+                return;
+            }
+        }
         new getFiles();
         new uiAPI();
         this.getLogger().info("开始加载等级觉醒插件 by--若水");
@@ -102,7 +120,7 @@ public class AwakenSystem extends PluginBase{
             this.saveDefaultConfig();
             this.reloadConfig();
         }
-
+        levelUpMath = getConfig().getString("等级算法",levelUpMath);
         File att = new File(this.getDataFolder()+"/attribute.yml");
         if(!att.exists()){
             this.saveResource("attribute.yml");
@@ -116,14 +134,17 @@ public class AwakenSystem extends PluginBase{
         //3秒后异步启动 看你怎么禁止
         this.getServer().getScheduler().scheduleDelayedTask(this,()->
                 this.getServer().getScheduler().scheduleAsyncTask(this, new AsyncTask() {
+                    @Override
                     public void onRun() {
                         Server.getInstance().getScheduler().scheduleRepeatingTask(new TipTask(),10);
                         Server.getInstance().getScheduler().scheduleRepeatingTask(new runTask(),20);
                         Server.getInstance().getScheduler().scheduleRepeatingTask(new getRingTask(),10);
                         Server.getInstance().getScheduler().scheduleRepeatingTask(new fixToInventoryTask(),10);
+
                         Server.getInstance().getScheduler().scheduleRepeatingTask(new showBossMessageTask(),10);
                     }
         }), 60);
+
     }
 
     public Config getAttributeConfig(){
@@ -135,16 +156,20 @@ public class AwakenSystem extends PluginBase{
     }
 
     public Config getPlayerConfig(String player){
-        if(new File(this.getPlayerFileName(player)).exists()){
-            return new Config(this.getPlayerFileName(player),Config.YAML);
-        }else{
-            LinkedHashMap<String,Object> conf = getFiles.initPlayer();
-            Config config = new Config(this.getPlayerFileName(player),Config.YAML);
-            config.setAll(conf);
-            config.save();
-            return getPlayerConfig(player);
+        if(!playerConfig.containsKey(player)){
+            if(new File(this.getPlayerFileName(player)).exists()){
+                playerConfig.put(player,new Config(this.getPlayerFileName(player),Config.YAML));
+            }else{
+                LinkedHashMap<String,Object> conf = getFiles.initPlayer();
+                Config config = new Config(this.getPlayerFileName(player),Config.YAML);
+                config.setAll(conf);
+                config.save();
+                return getPlayerConfig(player);
+
+            }
 
         }
+        return playerConfig.get(player);
     }
 
     public Config getItemConfig(String itemName){return new Config(this.getDataFolder()+"/RPG/"+itemName+".yml",Config.YAML);}
@@ -169,6 +194,10 @@ public class AwakenSystem extends PluginBase{
         return Main;
     }
 
-
-
+    @Override
+    public void onDisable() {
+        for(Config config:playerConfig.values()){
+            config.save();
+        }
+    }
 }

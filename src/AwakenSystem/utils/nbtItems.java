@@ -28,7 +28,7 @@ public class nbtItems implements baseAPI {
 
     private static nbtItems items;
     private String name;
-    nbtItems(String Item){
+    public nbtItems(String Item){
         items = this;
         name = Item;
     }
@@ -37,7 +37,7 @@ public class nbtItems implements baseAPI {
         return items;
     }
 
-    void createItem(Item ItemName, ITEM_TYPE item_type){
+    public void createItem(Item ItemName, ITEM_TYPE item_type){
         Config conf = AwakenSystem.getMain().getItemConfig(name);
         LinkedHashMap<String,Object> map = getFiles.initItem(ItemName,item_type);
         conf.setAll(map);
@@ -62,7 +62,7 @@ public class nbtItems implements baseAPI {
     }
 
 
-    private static String[] getLore(String itemName){
+    public static String[] getLore(String itemName){
         ArrayList<String> lore = new ArrayList<>();
         lore.add(defaultAPI.getItemConfigString(itemName,ItemType.MESSAGE).replace("\n","\n"));
         String type = defaultAPI.getItemConfigString(itemName,ItemType.TYPE);
@@ -123,8 +123,9 @@ public class nbtItems implements baseAPI {
     public static LinkedHashMap<ItemADDType,Integer> getColde_by_Ring(String itemName){
          LinkedHashMap<ItemADDType,Integer> array = new LinkedHashMap<>();
         for (ItemADDType types:ItemADDType.values()){
-            if(!defaultAPI.getItemConfigString(itemName,types).equals("0"))
+            if(!defaultAPI.getItemConfigString(itemName,types).equals("0")) {
                 array.put(types,Integer.parseInt(defaultAPI.getItemConfigString(itemName,types)));
+            }
         }
         return array;
     }
@@ -146,7 +147,7 @@ public class nbtItems implements baseAPI {
     }
 
 
-    Item toItem(String name){
+    public Item toItem(String name){
         String[] itemArray = defaultAPI.getItemConfigString(name,ItemType.ID).split(":");
         Item item = Item.get(Integer.parseInt(itemArray[0]),Integer.parseInt(itemArray[1]),1);
         item.setCustomName(name);
@@ -216,10 +217,8 @@ public class nbtItems implements baseAPI {
                 String att= defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE);
                 if(!defaultAPI.getItemConfigString(getName(item),ItemType.ATT).equals("null")
                         && !defaultAPI.getItemConfigString(getName(item),ItemType.LEVEL).equals("0")){
-                    if(att.equals(defaultAPI.getItemConfigString(getName(item),ItemType.ATT)) &&
-                            level >= Integer.parseInt(defaultAPI.getItemConfigString(getName(item),ItemType.LEVEL))){
-                        return true;
-                    }
+                    return att.equals(defaultAPI.getItemConfigString(getName(item), ItemType.ATT)) &&
+                            level >= Integer.parseInt(defaultAPI.getItemConfigString(getName(item), ItemType.LEVEL));
                 }else if (!defaultAPI.getItemConfigString(getName(item), ItemType.ATT).equals("null")) {
                     return att.equals(defaultAPI.getItemConfigString(getName(item), ItemType.ATT));
                 } else

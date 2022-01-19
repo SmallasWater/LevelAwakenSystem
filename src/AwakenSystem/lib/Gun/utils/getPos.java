@@ -19,6 +19,7 @@ import java.util.LinkedList;
 public class getPos {
 
     private Player player;
+
     public getPos(Player player){
         this.player = player;
     }
@@ -33,6 +34,7 @@ public class getPos {
         LinkedList<Position> positions = new LinkedList<>();
         double sd = Math.pow(playerPos.x-blockPos.x,2)+Math.pow(playerPos.y-blockPos.y,2)+Math.pow(playerPos.z-blockPos.z,2);
         int dis=(int)Math.sqrt(sd);
+
         for(int t = 0;t <= 1; t +=(1/(dis))){
             positions.add(new Position((playerPos.x+(blockPos.x - playerPos.x) * t)
                     ,(playerPos.y + (blockPos.y - playerPos.y) * t),(playerPos.z + (blockPos.z - playerPos.z) * t)));
@@ -43,7 +45,7 @@ public class getPos {
     //检测碰撞
 
     public boolean canAttack(Position position,Player player){
-        return (position.x > player.x - 0.2 && position.x < player.x + 0.2)
+        return (position.x > player.x - 0.5 && position.x < player.x + 0.5)
                 && (position.y > player.y && position.y < player.y + player.getEyeHeight())
                 && (position.z > player.z - 0.2 && position.z < player.z + 0.2);
 

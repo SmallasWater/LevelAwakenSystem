@@ -37,6 +37,7 @@ public class ArmorItem extends baseItem {
         return new String[0];
     }
 
+    @Override
     public CompoundTag getCompoundTag(){
         return super.getCompoundTag();
 

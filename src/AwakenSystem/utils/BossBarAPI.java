@@ -33,10 +33,9 @@ public class BossBarAPI {
 
     public void showBoss(){
         if(AwakenSystem.getMain().bar.get(player) != null){
-            float percentage = Math.round((float) player.getHealth() / player.getMaxHealth() * 100);
+            float percentage = Math.round(player.getHealth() / player.getMaxHealth() * 100);
             String text = AwakenSystem.getMain().getConfig().getString(baseAPI.ConfigType.showBoss.getName());
             DummyBossBar bossBar = AwakenSystem.getMain().bar.get(player);
-            bossBar.setColor(0,255,0);
             bossBar.setText(defaultAPI.getStr_replace(player, text));
             bossBar.setLength(percentage);
             player.createBossBar(bossBar);

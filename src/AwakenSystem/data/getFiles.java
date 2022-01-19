@@ -36,6 +36,7 @@ public class getFiles implements baseAPI{
         playerConfig.put(PlayerConfigType.ATTRIBUTE.getName(),null);
         playerConfig.put(PlayerConfigType.EXP.getName(),0);
         playerConfig.put(PlayerConfigType.COUNT.getName(),0);
+        playerConfig.put(PlayerConfigType.PVP.getName(),false);
         for (PlayerAttType type:PlayerAttType.values()){
             playerConfig.put(type.getName(),0);
         }

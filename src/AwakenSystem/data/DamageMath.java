@@ -160,10 +160,13 @@ public class DamageMath implements baseAPI{
      * */
     //#等级算法（写死 ） (等级 * (等级 + 200) ) + 设定 * 100
     public static int getUpDataEXP(Player player){
+
         int type = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.TALENT);
         int level = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL);
-        int exp = 0;
-        exp = (level * (level + 200)) + (type) * 100;
+        String str = AwakenSystem.getMain().levelUpMath;
+        str = str.replace("{level}",level+"").replace("{pf}",type+"").replace(" ","");
+        int exp;
+        exp = (int) Calculator.conversion(str);
         return exp;
     }
 
@@ -172,6 +175,7 @@ public class DamageMath implements baseAPI{
      * @return 获取觉醒属性的成功率*/
     //获取觉醒成功率
     public static int getAwaken(Player player){
+
         int count = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.COUNT);
         int level = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL);
         int type = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.TALENT);
@@ -302,14 +306,17 @@ public class DamageMath implements baseAPI{
      * */
     public static boolean studyAwaken(Player player){
         String att = defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE);
-        if(att.equals("null")) return false;
-        String up = defaultAPI.getUpDataAwaken(att);
-        if(up != null && !up.equals("null")){
-            int l = (int) defaultAPI.getAwakenConfig(up).get(AttType.useLevel.getName());
-            int PlayerLevel = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL);
-            return PlayerLevel >= l;
+        if (!"null".equals(att)) {
+            String up = defaultAPI.getUpDataAwaken(att);
+            if (up != null && !"null".equals(up)) {
+                int l = (int) defaultAPI.getAwakenConfig(up).get(AttType.useLevel.getName());
+                int PlayerLevel = defaultAPI.getPlayerAttributeInt(player.getName(), PlayerConfigType.LEVEL);
+                return PlayerLevel >= l;
+            }
+            return false;
+        } else {
+            return false;
         }
-        return false;
     }
     //觉醒属性等级判断
     /**

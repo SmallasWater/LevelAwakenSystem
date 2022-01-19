@@ -16,6 +16,9 @@ import cn.nukkit.Player;
 
 import java.util.LinkedHashMap;
 
+/**
+ * @author SmallasWater
+ */
 public class PlayerBuffer implements baseAPI{
     private Player player;
     private String bufferName;
@@ -50,6 +53,8 @@ public class PlayerBuffer implements baseAPI{
         }
         return this.buffer;
     }
+
+
     public LinkedHashMap<String,LinkedHashMap<ItemADDType,int[]>> removeBuffer_Type(ItemADDType type){
         if(this.buffer.containsKey(this.bufferName)){
             if(this.buffer.get(this.bufferName).containsKey(type)){

@@ -24,9 +24,10 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.particle.DestroyBlockParticle;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.network.protocol.ModalFormResponsePacket;
+import cn.nukkit.network.protocol.*;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
+import healthapi.PlayerHealth;
 import me.onebone.economyapi.EconomyAPI;
 
 import java.io.File;
@@ -42,15 +43,16 @@ import java.util.*;
 
 public class PlayerEvents implements Listener {
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onPvpDamage(PlayerAttackEvent event){
-        if(event.isCancelled()) return;
+        if(event.isCancelled()) {
+            return;
+        }
         Entity damager = (event).getDamager();
 
         Entity entity = event.getEntity();
 
         DamageMath math = new DamageMath();
-        StringBuilder cause = new StringBuilder("");
         if(damager instanceof Player && entity instanceof Player){
             int[] damage = math.getDamage_byPVP((Player) damager,(Player) entity,
                     new float[]{( event).getDamageW(),(event).getDamageF()});
@@ -59,23 +61,20 @@ public class PlayerEvents implements Listener {
             if(map != null){
                 if(map.containsKey("暴击")){
                     damage[0] += map.get("暴击");
-                    cause.append(" §d暴击§r ");
+
 
                 }
                 if(map.containsKey("克制")){
                     damage[1] += map.get("克制");
                     map.remove("克制");
-                    cause.append(" §b克制§r ");
                 }
                 if(map.containsKey("被克制")){
                     damage[1] -= map.get("被克制");
                     map.remove("被克制");
-                    cause.append(" §f微弱§r ");
                 }
             }
             int delDamageFinal = math.getDelDamage_byPVP((Player) damager,(Player) entity,damage);
             if(delDamageFinal <= 0){
-                cause.append(" §c(强制伤害)§r ");
                 delDamageFinal = 1;
             }
             if(map != null){
@@ -91,77 +90,100 @@ public class PlayerEvents implements Listener {
                 }
             }
             event.setDamage(delDamageFinal);
-
-            ((Player) damager).sendPopup(cause.toString()+" §f- §b"+event.getDamage()+"\n\n\n\n\n\n\n\n\n");
-            ((Player) entity).sendPopup(cause.toString()+"§f- §c"+event.getDamage()+"\n\n\n\n\n\n\n\n\n");
         }else if(damager instanceof Player){
             event.setDamage(event.getDamageF() + event.getDamageW());
-            ((Player) damager).sendPopup(cause.toString()+" §f- §b"+event.getDamage()+"\n\n\n\n\n\n\n\n\n");
         }
     }
-    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
-    public void onEntityDamage(EntityDamageEvent event){
-        if(event instanceof PlayerAttackEvent){
-//                event.setDamage(((PlayerAttackEvent) event).getDamageF()+((PlayerAttackEvent) event).getDamageF());
+    @EventHandler(priority = EventPriority.LOW,ignoreCancelled = true)
+    public void onEntityDamage(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
+        if (event instanceof PlayerAttackEvent) {
+            Entity damager = ((PlayerAttackEvent) event).getDamager();
+            if (damager instanceof Player && entity instanceof Player) {
+                int eLevel = defaultAPI.getPlayerAttributeInt(entity.getName(), baseAPI.PlayerConfigType.LEVEL);
+                int dLevel = defaultAPI.getPlayerAttributeInt(damager.getName(), baseAPI.PlayerConfigType.LEVEL);
+                if (Math.abs(dLevel - eLevel) > AwakenSystem.getMain().getConfig().getInt(baseAPI.ConfigType.getPVPLevel.getName(), 10)) {
+                    event.setCancelled();
+                    ((Player) damager).sendMessage("§c目标与你的等级相差过大！");
+                    return;
+                }
+            }
             return;
+        }
+        if (Server.getInstance().getPluginManager().getPlugin("HealthAPI") == null) {
+            if (entity instanceof Player && AwakenSystem.getMain().defaultMaxHealth.containsKey(entity)) {
+                int mh = AwakenSystem.getMain().defaultMaxHealth.get(entity);
+
+                if (entity.getMaxHealth() != mh + defaultAPI.getPlayerFinalAttributeInt((Player) entity, baseAPI.ItemADDType.HEALTH)) {
+                    entity.setMaxHealth(mh + defaultAPI.getPlayerFinalAttributeInt((Player) entity, baseAPI.ItemADDType.HEALTH));
+                }
+
+            }
+        }else {
+            if (entity instanceof Player) {
+                PlayerHealth health = PlayerHealth.getPlayerHealth((Player) entity);
+                int add =  defaultAPI.getPlayerFinalAttributeInt((Player) entity, baseAPI.ItemADDType.HEALTH);
+                health.setMaxHealth("LevelAwakenSystem",add);
+            }
         }
         if(event instanceof EntityDamageByEntityEvent){
 
-            if(event.isCancelled()) return;
+            if(event.isCancelled()) {
+                return;
+            }
             Entity damager = ((EntityDamageByEntityEvent) event).getDamager();
-            Entity entity = event.getEntity();
             if(damager instanceof Player && entity instanceof Player){
                 event.setDamage(defaultAPI.addPlayerAttack((Player)damager,entity,event.getDamage(),0).getDamage());
                 return;
             }
             if(entity instanceof Player){
-                float damage = event.getFinalDamage();
-                StringBuilder cause = new StringBuilder("");
+                float damage = event.getDamage();
+
                 if(defaultAPI.getPlayerFinalAttributeInt(
                         (Player) entity, baseAPI.ItemADDType.DEFENSE_W) > 0){
                     damage -= defaultAPI.getPlayerFinalAttributeInt(
                             (Player) entity, baseAPI.ItemADDType.DEFENSE_W);
                 }
                 if(damage <= 0){
-                    cause.append(" §c(强制伤害)§r ");
+
                     damage = 1;
                 }
                 event.setDamage(damage);
-                ((Player) entity).sendPopup(cause+"§f- §c"+(int)event.getFinalDamage()+"\n\n\n\n\n\n\n\n\n");
                 return;
             }
             if(damager instanceof Player){
-                float finalDamage = event.getFinalDamage();
+                float finalDamage = event.getDamage();
                 int damage = defaultAPI.getPlayerFinalAttributeInt((Player) damager, baseAPI.ItemADDType.DAMAGE_W);
-                int F = 0;
+                int f = 0;
                 if(!defaultAPI.getPlayerAttributeString(damager.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
-                    F = defaultAPI.getPlayerFinalAttributeInt((Player) damager, baseAPI.ItemADDType.DAMAGE_F);
+                    f = defaultAPI.getPlayerFinalAttributeInt((Player) damager, baseAPI.ItemADDType.DAMAGE_F);
                 }
-                event.setDamage(damage + F + finalDamage);
+                float d = damage + f + finalDamage;
+                if(d <= 0){
+                    d = 1;
+                }
+                event.setDamage(d);
 
-                ((Player) damager).sendPopup("§f- §b"+(int)event.getFinalDamage()+"\n\n\n\n\n\n\n\n\n");
+//                ((Player) damager).sendPopup("§f- §b"+(int)event.getFinalDamage()+"\n\n\n\n\n\n\n\n\n");
             }
         }
     }
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void showDamage(EntityDamageEvent event){
-        Entity entitys = event.getEntity();
-        if(entitys instanceof Player){
-            if(AwakenSystem.getMain().defaultMaxHealth.containsKey(entitys)){
-                if(entitys.getMaxHealth() != AwakenSystem.getMain().defaultMaxHealth.get(entitys) +
-                        defaultAPI.getPlayerFinalAttributeInt((Player) entitys, baseAPI.ItemADDType.HEALTH))
-                    entitys.setMaxHealth(AwakenSystem.getMain().defaultMaxHealth.get(entitys) +
-                            defaultAPI.getPlayerFinalAttributeInt((Player) entitys, baseAPI.ItemADDType.HEALTH));
-                
-            }
 
-        }
-    }
-    @EventHandler(priority = EventPriority.MONITOR)
+
+
+
+
+
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
         File file = new File(AwakenSystem.getMain().getPlayerFileName(player));
-        BossBarAPI api = new BossBarAPI(player);
+        BossBarAPI api = null;
+        if(AwakenSystem.getMain().getConfig().getBoolean(baseAPI.ConfigType.can_show_Boss.getName())){
+            api = new BossBarAPI(player);
+        }
+
         if(!file.exists()){
             Server.getInstance().getLogger().info("正在初始化"+player.getName());
             LinkedHashMap<String,Object> conf = getFiles.initPlayer();
@@ -170,29 +192,43 @@ public class PlayerEvents implements Listener {
             config.save();
             if(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.TALENT) > 3){
                 List<String> list = AwakenSystem.getMain().getConfig().getStringList(baseAPI.ConfigType.SETTING_CHAT.getName());
-                String Ta = list.get(defaultAPI.getPlayerAttributeInt(player.getName(),baseAPI.PlayerConfigType.TALENT));
-                Server.getInstance().broadcastMessage("§d 恭喜玩家 "+player.getName()+"获得了 "+Ta+"§c 的天赋 §a未来前途不可限量");
+                String ta = list.get(defaultAPI.getPlayerAttributeInt(player.getName(),baseAPI.PlayerConfigType.TALENT));
+                Server.getInstance().broadcastMessage("§d 恭喜玩家 "+player.getName()+"获得了 "+ta+"§c 的天赋 §a未来前途不可限量");
             }
-            if(!AwakenSystem.getMain().defaultMaxHealth.containsKey(player)){
-                AwakenSystem.getMain().defaultMaxHealth.put(player,player.getMaxHealth());
-                player.setMaxHealth(player.getMaxHealth() + defaultAPI.getPlayerFinalAttributeInt(player, baseAPI.ItemADDType.HEALTH));
-                api.createBossBar();
-            }
+            defaultHealth(player, api);
         }else{
             //获取基础生命
-            if(!AwakenSystem.getMain().defaultMaxHealth.containsKey(player)){
-                AwakenSystem.getMain().defaultMaxHealth.put(player,player.getMaxHealth());
-                player.setMaxHealth(player.getMaxHealth() + defaultAPI.getPlayerFinalAttributeInt(player, baseAPI.ItemADDType.HEALTH));
-                api.createBossBar();
-            }
+            defaultHealth(player, api);
 
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    private void defaultHealth(Player player, BossBarAPI api) {
+        if(Server.getInstance().getPluginManager().getPlugin("HealthAPI") != null){
+            PlayerHealth health = PlayerHealth.getPlayerHealth(player);
+            AwakenSystem.getMain().defaultMaxHealth.put(player,player.getMaxHealth());
+            int add = defaultAPI.getPlayerFinalAttributeInt(player, baseAPI.ItemADDType.HEALTH);
+            health.setMaxHealth("LevelAwakenSystem",add);
+        }else{
+            if(!AwakenSystem.getMain().defaultMaxHealth.containsKey(player)){
+                AwakenSystem.getMain().defaultMaxHealth.put(player,player.getMaxHealth());
+                player.setMaxHealth(player.getMaxHealth() + defaultAPI.getPlayerFinalAttributeInt(player, baseAPI.ItemADDType.HEALTH));
+
+            }
+        }
+
+        if(AwakenSystem.getMain().getConfig().getBoolean(baseAPI.ConfigType.can_show_Boss.getName())){
+            if(api != null){
+                api.createBossBar();
+            }
+        }
+    }
+
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onAddExp(PlayerAddExpEvent event){
         Player player = event.getPlayer();
-        if(player.getGamemode() != 0){
+        if(player.getGamemode() == 1){
             event.setCancelled(true);
             player.sendMessage("§c创造模式不增加经验");
             return;
@@ -208,10 +244,16 @@ public class PlayerEvents implements Listener {
         player.sendTip("§e 恭喜你获得 "+event.getExp()+"点经验");
         player.level.addSound(player.getPosition(), Sound.RANDOM_LEVELUP);
         int maxExp = DamageMath.getUpDataEXP(player);
-        if((exp + defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP)) >= maxExp){
+        int playerExp =  defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP);
+        if((exp + playerExp) >= maxExp){
             PlayerLevelUpEvent event1 = new PlayerLevelUpEvent(player,
                     defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL),1);
             Server.getInstance().getPluginManager().callEvent(event1);
+            int delexp = (exp + playerExp) - maxExp;
+            if(delexp > 0) {
+                PlayerAddExpEvent expEvent = new PlayerAddExpEvent(event.getPlayer(), delexp);
+                Server.getInstance().getPluginManager().callEvent(expEvent);
+            }
         }else{
             exp += defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP);
             defaultAPI.setPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP,exp);
@@ -222,9 +264,9 @@ public class PlayerEvents implements Listener {
         Player player = event.getPlayer();
         int level = defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL);
         HashMap map = (HashMap) AwakenSystem.getMain().getConfig().get(baseAPI.ConfigType.UPDATA.getName());
-        if(map.containsKey(level)){
+        if(map.containsKey(level+"")){
             player.sendMessage("§l§b[系统]§d恭喜你升到 "+level+"级");
-            ArrayList list = (ArrayList) map.get(level);
+            ArrayList list = (ArrayList) map.get(level+"");
             for (Object it:list){
                 String[] su = String.valueOf(it).split("&");
                 String name = null;
@@ -260,6 +302,7 @@ public class PlayerEvents implements Listener {
                                 player.sendMessage("§l§e◎ - 你获得了 "+name);
                             }
                             break;
+                            default:break;
                     }
                 }
             }
@@ -282,9 +325,10 @@ public class PlayerEvents implements Listener {
         defaultAPI.setPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.LEVEL,event.getAddLevel() + event.getOldLevel());
         player.attack(1);
         if(event.isShowUi()){
-            player.level.addSound(player.getPosition(), Sound.CAULDRON_EXPLODE);
-            uiAPI uiAPI = new uiAPI();
-            uiAPI.sendMenuMessage(player,text.toString());
+            player.sendMessage(text.toString());
+//            player.level.addSound(player.getPosition(), Sound.CAULDRON_EXPLODE);
+//            uiAPI uiAPI = new uiAPI();
+//            uiAPI.sendMenuMessage(player,text.toString());
         }
     }
     private boolean canRemove(Player player,LinkedList<Item> upItem){
@@ -304,6 +348,7 @@ public class PlayerEvents implements Listener {
                 return false;
             }else{
                 player.sendMessage(TextFormat.YELLOW+"扣除》》");
+
                 for(Item item:upItem){
                     player.getInventory().removeItem(item);
                     player.sendMessage(TextFormat.YELLOW+"§e◎- "+item.getCustomName()+" * "+item.getCount());
@@ -321,10 +366,18 @@ public class PlayerEvents implements Listener {
     //判断物品是否在背包 有则返回物品 没有返回null
     private Item in_Inventory(Player player,Item item){
         for (Item item1:player.getInventory().getContents().values()){
-            if(item1.equals(item,true,true))
+            if(item1.equals(item,true,true)) {
                 return item1;
+            }
         }
         return null;
+    }
+
+    @EventHandler
+    public void onQuitEvent(PlayerQuitEvent event){
+        for(Config config:AwakenSystem.getMain().playerConfig.values()){
+            config.save();
+        }
     }
 
 
@@ -339,7 +392,11 @@ public class PlayerEvents implements Listener {
         if(isAwaken(player,att)){
             EconomyAPI.getInstance().reduceMoney(player,DamageMath.getReduceMoney(player));
             int random = new Random().nextInt(100) + 1;
-            if(random <= DamageMath.getAwaken(player)){
+            int r = DamageMath.getAwaken(player);
+            if(defaultAPI.getAwakenConfig(att).containsKey("成功率")){
+                r = (int) defaultAPI.getAwakenConfig(att).get("成功率");
+            }
+            if(random <= r){
                 Server.getInstance().broadcastMessage("§d恭喜玩家 "+player.getName()+"觉醒成功 "+"§6获得了§e"+att+"§6的魔法属性");
                 defaultAPI.setPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE,att);
                 defaultAPI.addPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.COUNT,1);
@@ -351,16 +408,21 @@ public class PlayerEvents implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR,ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event){
         Player player = event.getPlayer();
         HashMap<String,Object> arrays = (HashMap<String, Object>) AwakenSystem.getMain().getConfig().getAll();
-        HashMap map = (HashMap) arrays.get(baseAPI.ConfigType.EXP_ORE.getName());
+        Map map = (Map) arrays.get(baseAPI.ConfigType.EXP_ORE.getName());
         Block block = event.getBlock();
-        if(event.isCancelled()) return;
-        if(map.containsKey(block.getId())){
-            float exp = Float.parseFloat(String.valueOf(map.get(block.getId())));
-            defaultAPI.addExp(player,exp);
+        if(event.isCancelled()) {
+            return;
+        }
+
+        if(map.containsKey(block.getId()+"")){
+            float exp = Float.parseFloat(String.valueOf(map.get(block.getId()+"")));
+            if(exp > 0) {
+                defaultAPI.addExp(player, exp);
+            }
         }
     }
     @EventHandler(priority = EventPriority.MONITOR)
@@ -370,7 +432,9 @@ public class PlayerEvents implements Listener {
             Entity killer = ((EntityDamageByEntityEvent) damage).getDamager();
             if(killer instanceof Player){
                 int exp = AwakenSystem.getMain().getConfig().getInt(baseAPI.ConfigType.EXP_PVP.getName());
-                defaultAPI.addExp((Player) killer,(float) exp);
+                if(exp > 0) {
+                    defaultAPI.addExp((Player) killer, (float) exp);
+                }
             }
         }
     }
@@ -388,14 +452,14 @@ public class PlayerEvents implements Listener {
             if(canRemove(player,list)){
                 player.sendMessage("§e>> 恭喜 属性进阶成功");
                 defaultAPI.setPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE,string);
-                Server.getInstance().getLogger().info("§d恭喜玩家 "+player.getName()+"进阶属性成功 "+"§6获得了§e"+string+"§6的魔法属性");
+                Server.getInstance().broadcastMessage("§d恭喜玩家 "+player.getName()+"进阶属性成功 "+"§6获得了§e"+string+"§6的魔法属性");
             }else{
                 player.sendMessage("§c属性进阶失败");
             }
         }else{
             player.sendMessage("§e>> 恭喜 属性进阶成功");
-            Server.getInstance().getLogger().info("§d恭喜玩家 "+player.getName()+"进阶属性成功 "+"§6获得了§e"+string+"§6的魔法属性");
-
+            defaultAPI.setPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE,string);
+            Server.getInstance().broadcastMessage("§d恭喜玩家 "+player.getName()+"进阶属性成功 "+"§6获得了§e"+string+"§6的魔法属性");
         }
     }
 
@@ -600,7 +664,9 @@ public class PlayerEvents implements Listener {
                             text.append("§d饰品 : ").append(add).append("\n");
                             text.append("§6经验值 : ").append(defaultAPI.getPlayerAttributeInt(player.getName(), baseAPI.PlayerConfigType.EXP)).append(" / ").append(DamageMath.getUpDataEXP(player)).append("\n");
                             for (baseAPI.ItemADDType type : baseAPI.ItemADDType.values()) {
-                                if (type.getName().equals(baseAPI.ItemADDType.EXP.getName())) continue;
+                                if (type.getName().equals(baseAPI.ItemADDType.EXP.getName())) {
+                                    continue;
+                                }
                                 text.append(type.getName()).append(" : §e").append(defaultAPI.getPlayerFinalAttributeInt(player, type)).append("\n");
                             }
                             uiAPI.getApi().sendMenuMessage(player, text.toString());
@@ -676,7 +742,9 @@ public class PlayerEvents implements Listener {
     public void onChat(PlayerChatEvent event){
         Player player = event.getPlayer();
         String message = event.getMessage();
-        if(event.isCancelled()) return;
+        if(event.isCancelled()) {
+            return;
+        }
         String string = AwakenSystem.getMain().getConfig().getString(baseAPI.ConfigType.CHAT_MESSAGE.getName());
         if(AwakenSystem.getMain().getConfig().getBoolean(baseAPI.ConfigType.can_show_message.getName())){
             string = defaultAPI.getStr_replace(player,string);
@@ -689,12 +757,51 @@ public class PlayerEvents implements Listener {
 
     }
 
+//    @EventHandler
+//    public void onItemInHand(PlayerItemHeldEvent e){
+//        Player player = e.getPlayer();
+//        if(AwakenSystem.getMain().getConfig().getBoolean("是否显示个人信息",true)) {
+//            String s = AwakenSystem.getMain().getConfig().getString("个人信息内容", "");
+//            if (e.getItem().getId() == 339) {
+//                player.setScale(-1);
+//            }
+////                if (!"".equals(s)) {
+////                    float yaw = (float) ((player.yaw + 180) * Math.PI / 180);
+////                    AddEntityPacket pk = new AddEntityPacket();
+////                    pk.type = 37;
+////                    pk.entityUniqueId = 0x55ac1c;
+////                    pk.speedX = 0;
+////                    pk.speedY = 0;
+////                    pk.speedZ = 0;
+////                    pk.x = (float) (player.x + 3.2 * Math.cos(yaw));
+////                    pk.y = (float) player.y;
+////                    pk.z = (float) (player.z + 3.2 * Math.sin(yaw));
+////                    pk.metadata = defaultAPI.getMeta(player, s);
+////                    player.dataPacket(pk);
+////                    System.out.println("生成");
+//////                    defaultAPI.onUpdateText(player,115, s);
+////                }
+////            } else {
+////                if (!"".equals(s)) {
+//////                    defaultAPI.onUpdateText(player, 180, s);
+////                    RemoveEntityPacket pk = new RemoveEntityPacket();
+////                    pk.eid = 0x55ac1c;
+////                    player.dataPacket(pk);
+////                }
+////            }
+//        }
+//    }
+
     @EventHandler
     public void onInt(PlayerInteractEvent event){
-        if(event.isCancelled()) return;
+        if(event.isCancelled()) {
+            return;
+        }
         Player player = event.getPlayer();
         Item item = event.getItem();
-        if(item == null) return;
+        if(item == null) {
+            return;
+        }
         if(nbtItems.is_Item(item)){
             if(nbtItems.can_use(player,item)){
                 if(!defaultAPI.getItemConfigString(nbtItems.getName(item), baseAPI.ItemType.TYPE).equals(baseAPI.ITEM_TYPE.ORNAMENTS.getName())){
@@ -752,7 +859,9 @@ public class PlayerEvents implements Listener {
             }
         }
         item = player.getInventory().getItemInHand();
-        if(item == null) return;
+        if(item == null) {
+            return;
+        }
         if(CommandItems.is_NbtItem(item)){
             String itemName = CommandItems.getName(item);
             if(CommandItems.is_Exit(itemName)){
@@ -804,11 +913,15 @@ public class PlayerEvents implements Listener {
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void moveEvent(PlayerMoveEvent event){
         Player player = event.getPlayer();
-        if(!defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE).equals("null")){
+        if(!"null".equals(defaultAPI.getPlayerAttributeString(player.getName(), baseAPI.PlayerConfigType.ATTRIBUTE))){
+
             defaultAPI.showParticle(player);
+        }
+        if(AwakenSystem.getMain().getConfig().getBoolean("是否显示个人信息",true)) {
+//            defaultAPI.onUpdateText(player);
         }
     }
 

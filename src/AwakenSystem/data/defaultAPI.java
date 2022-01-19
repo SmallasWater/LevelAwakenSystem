@@ -10,11 +10,14 @@ import AwakenSystem.utils.nbtItems;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.data.EntityMetadata;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.particle.DustParticle;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
+import cn.nukkit.network.protocol.SetEntityDataPacket;
 import cn.nukkit.utils.Config;
 import me.onebone.economyapi.EconomyAPI;
 
@@ -57,8 +60,10 @@ public class defaultAPI implements baseAPI{
      * */
     public static int getPlayerFinalAttributeInt(Player player,ItemADDType type){
         int add = DamageMath.getAddPlayerAttribute(player,type);
-        if(type == ItemADDType.EXP) return getPlayerAttributeInt(player.getName(),PlayerConfigType.EXP);
-            return AwakenSystem.getMain().getPlayerConfig(player).getInt(type.getName()) + add;
+        if(type == ItemADDType.EXP) {
+            return getPlayerAttributeInt(player.getName(),PlayerConfigType.EXP);
+        }
+        return AwakenSystem.getMain().getPlayerConfig(player).getInt(type.getName()) + add;
     }
     /**
      * 获取玩家属性数据 使用AwakenSystem.data.baseAPI.PlayerAttType
@@ -91,7 +96,7 @@ public class defaultAPI implements baseAPI{
     public static void setPlayerAttributeInt(String player, PlayerConfigType type,int value){
         Config config = AwakenSystem.getMain().getPlayerConfig(player);
         config.set(type.getName(),value);
-        config.save();
+//        config.save();
     }
 
     //设置玩家的属性 通过 PlayerAttType
@@ -104,7 +109,7 @@ public class defaultAPI implements baseAPI{
     public static void setPlayerAttributeInt(String player, PlayerAttType type,int value){
         Config config = AwakenSystem.getMain().getPlayerConfig(player);
         config.set(type.getName(),value);
-        config.save();
+//        config.save();
     }
     /**
      * @param player 玩家名称
@@ -116,7 +121,7 @@ public class defaultAPI implements baseAPI{
     public static void setPlayerAttributeString(String player, PlayerConfigType type,String value){
         Config config = AwakenSystem.getMain().getPlayerConfig(player);
         config.set(type.getName(),value);
-        config.save();
+//        config.save();
     }
     /**
      * @param player 玩家名称
@@ -190,7 +195,7 @@ public class defaultAPI implements baseAPI{
             config.set(type.getName(),a);
         }
 
-        config.save();
+//        config.save();
     }
     /**
      * @param itemName 小道具名称
@@ -302,8 +307,8 @@ public class defaultAPI implements baseAPI{
     public static LinkedList<Item> getUpScore(int level){
         HashMap map = (HashMap) AwakenSystem.getMain().getConfig().get(ConfigType.ADDItems.getName());
         if(map != null){
-            if(map.containsKey(level)){
-                return getItems((List) map.get(level));
+            if(map.containsKey(level+"")){
+                return getItems((List) map.get(level+""));
             }
         }
         return null;
@@ -528,7 +533,7 @@ public class defaultAPI implements baseAPI{
      * @return 获取属性配置
      * */
     //获取元素配置
-    static HashMap getAwakenConfig(String att){
+    public static HashMap getAwakenConfig(String att){
         return (HashMap) AwakenSystem.getMain().getAttributeConfig().get(att);
     }
     /**
@@ -576,8 +581,8 @@ public class defaultAPI implements baseAPI{
                 replace("{天赋}",getChatBySetting(player.getName())).
                 replace("{换行}","\n").
                 replace("{level}",String.valueOf(defaultAPI.getPlayerAttributeInt(player.getName(),PlayerConfigType.LEVEL))).
-                replace("{h}",String.valueOf(player.getHealth())).
-                replace("{mh}",String.valueOf(player.getMaxHealth())).
+//                replace("{h}",String.valueOf(player.getHealth())).
+//                replace("{mh}",String.valueOf(player.getMaxHealth())).
                 replace("{exp}",String.valueOf(defaultAPI.getPlayerAttributeInt(player.getName(),PlayerConfigType.EXP))).
                 replace("{mexp}",String.valueOf(DamageMath.getUpDataEXP(player))).
                 replace("{dw}",String.valueOf(defaultAPI.getPlayerFinalAttributeInt(player,ItemADDType.DAMAGE_W))).
@@ -591,8 +596,10 @@ public class defaultAPI implements baseAPI{
                 replace("{饰品}", add != null ? add : "无").
                 replace("{pvp}",pvp?"§c敌对":"§a和平").
                 replace("{id}",hand.getId()+"").
-                replace("{money}", EconomyAPI.getInstance().myMoney(player)+"").
+//                replace("{money}", EconomyAPI.getInstance().myMoney(player)+"").
                 replace("{damage}",hand.getDamage()+"");
+//                replace("{online}",Server.getInstance().getOnlinePlayers().size()+"").
+//                replace("{maxplayer}",Server.getInstance().getMaxPlayers()+"");
         return string;
 
     }
@@ -759,9 +766,17 @@ public class defaultAPI implements baseAPI{
      * */
     //显示粒子
     public static void showParticle(Player player){
-        if(!defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE).equals("null")){
+        if(!"null".equals(defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE))){
             HashMap rgbs = (HashMap) AwakenSystem.getMain().getAttributeConfig().
                     get(defaultAPI.getPlayerAttributeString(player.getName(),PlayerConfigType.ATTRIBUTE));
+            if(rgbs == null){
+                return;
+            }
+            if(rgbs.containsKey("是否显示")){
+                if(!(boolean)rgbs.get("是否显示")){
+                    return;
+                }
+            }
             if(rgbs.containsKey(AttType.Particle.getName())){
                 HashMap rgb = (HashMap) rgbs.get(AttType.Particle.getName());
                 int r = (int) rgb.get(AttType.R.getName());
@@ -812,13 +827,53 @@ public class defaultAPI implements baseAPI{
             if(!name.equals(att)){
                 String up = getUpDataAwaken(name);
                 if(up != null){
-                    if(up.equals(att))
+                    if(up.equals(att)) {
                         return false;
+                    }
                 }
             }
         }
         return true;
     }
+
+    public static void onUpdateText(Player player){
+        onUpdateText(player,115,AwakenSystem.getMain().getConfig().getString("个人信息内容", ""));
+    }
+
+    public static void onUpdateText(Player player,int args,String s){
+        float yaw = (float) ((player.yaw + args) * Math.PI / 180);
+
+        MoveEntityAbsolutePacket pk = new MoveEntityAbsolutePacket();
+        pk.eid = 0x55ac1c;
+        pk.x = player.x + 3.2 * Math.cos(yaw);
+        pk.y = (player.y + 1.5) + -Math.sin(player.pitch / 180 * Math.PI);
+        pk.z = player.z + 3.2 * Math.sin(yaw);
+        pk.yaw = 0;
+        pk.headYaw = 0;
+        pk.pitch = 0;
+        player.dataPacket(pk);
+
+        SetEntityDataPacket pk1 = new SetEntityDataPacket();
+        pk1.eid = 0x55ac1c;
+        pk1.metadata = getMeta(player,s);
+
+        player.dataPacket(pk1);
+
+    }
+
+    public static EntityMetadata getMeta(Player player, String s){
+        long flags = 114688L;
+        return new EntityMetadata()
+                .putLong(0, flags)
+                .putString(4, defaultAPI.getStr_replace(player,s))
+                .putLong(37, -1L)
+                .putBoolean(Entity.DATA_ALWAYS_SHOW_NAMETAG,true)
+                .putInt(39,0)
+                .putFloat(38, -1);
+    }
+
+
+
 
 
     //---技能栏---//

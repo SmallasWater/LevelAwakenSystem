@@ -30,7 +30,7 @@ public class CommandItems extends baseItem {
     private String name = null;
     private static CommandItems api;
 
-    private CommandItems(String name){
+    public CommandItems(String name){
         this.name = name;
         api = this;
     }
@@ -38,6 +38,7 @@ public class CommandItems extends baseItem {
         new CommandItems(name);
         return api;
     }
+    @Override
     public CompoundTag getCompoundTag(){
         return new CompoundTag()
                 .putString("tag","LevelAwakenSystem"+Name)
@@ -73,7 +74,9 @@ public class CommandItems extends baseItem {
     }
 
     public static boolean is_Exit(String name){
-        if(name == null) return false;
+        if(name == null) {
+            return false;
+        }
         File file = new File(AwakenSystem.getMain().getDataFolder()+"/RPG/Items/"+name+".yml");
         return file.exists();
     }
@@ -87,6 +90,7 @@ public class CommandItems extends baseItem {
         }
         return null;
     }
+    @Override
     public Item getItem(int count){
         if(is_Exit(name)){
             String id = AwakenSystem.getMain().getCommandItemConfig(name).getString(baseAPI.ItemConfigType.ID.getName());
@@ -113,6 +117,7 @@ public class CommandItems extends baseItem {
         return getItem(1);
     }
 
+    @Override
     public String[] getLore(){
         if(is_Exit(name)){
             ArrayList<String> lore = new ArrayList<>();

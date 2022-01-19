@@ -145,6 +145,7 @@ public interface baseAPI {
         show_Tip_type(17,"底部显示类型"),
         TIP(13,"底部显示"),
         can_show_Boss(18,"是否开启Boss血条显示"),
+        getPVPLevel(20,"PVP限制等级"),
         showBoss(19,"Boss血条显示内容");
         protected int type = 0;
         protected String name = null;
@@ -196,6 +197,7 @@ public interface baseAPI {
         TALENT(1,"天赋"),
         ATTRIBUTE(2,"属性"),
         EXP(3,"经验值"),
+        PVP(4,"PVP"),
         /*Skill(4,"技能"),
         Magic(5,"魔法值"),
         MaxMagic(6,"最大魔法值"),*/

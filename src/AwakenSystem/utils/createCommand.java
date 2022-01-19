@@ -11,6 +11,7 @@ package AwakenSystem.utils;
  */
 
 import AwakenSystem.data.baseAPI;
+import AwakenSystem.events.PlayerGetItemEvent;
 import AwakenSystem.lib.removeItem.CommandItems;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -30,7 +31,9 @@ public class createCommand extends Command{
     @Override
     public boolean execute(CommandSender commandSender, String s, String[] strings) {
         if(commandSender.isOp()) {
-            if (strings.length < 1 || strings.length > 4) return false;
+            if (strings.length < 1 || strings.length > 4) {
+                return false;
+            }
             List<String> args = Arrays.asList(strings);
             switch (strings[0]) {
                 case "help":
@@ -120,6 +123,8 @@ public class createCommand extends Command{
                     Item itemS = items.toItem(Name1);
                     itemS.setCustomName(Name1);
                     player1.getInventory().addItem(itemS);
+                    PlayerGetItemEvent event = new PlayerGetItemEvent(player1,itemS);
+                    Server.getInstance().getPluginManager().callEvent(event);
                     commandSender.sendMessage(TextFormat.AQUA + "小道具给予成功");
                     break;
                 case "giveItem":
@@ -133,6 +138,8 @@ public class createCommand extends Command{
                         if(CommandItems.is_Exit(name)){
                             item = CommandItems.getInstance(name).getItem(count);
                             if(item != null){
+                                PlayerGetItemEvent event1 = new PlayerGetItemEvent(player,item);
+                                Server.getInstance().getPluginManager().callEvent(event1);
                                 player.getInventory().addItem(item);
                             }else {
                                 commandSender.sendMessage(TextFormat.RED + "给予失败");
